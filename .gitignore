@@ -6,3 +6,4 @@
 *.script
 .eunit/
 erl_crash.dump
+*~
