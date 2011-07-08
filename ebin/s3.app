@@ -4,5 +4,5 @@
               {registered,[]},
               {applications,[kernel,stdlib,sasl,inets]},
               {mod,{s3_app,[]}},
-              {modules,[s3_app, s3_sup, s3]},
+              {modules,[s3_app, s3_sup, s3, s3_client]},
               {env,[{s3_conf_path,[]}]}]}.
