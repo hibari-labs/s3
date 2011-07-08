@@ -18,6 +18,7 @@
 %%%----------------------------------------------------------------------
 
 -module(s3_client_tests).
+-include("s3.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -30,4 +31,16 @@
 %%
 
 start_1_000_test() ->
+    %% application:start(inets),
+    %% %% assuming gdss_s3_proto si running on port 23580
+    %% State = #state{host = "localhost",
+    %% 		   port = 23580,
+    %% 		   id = "12345",
+    %% 		   auth_key = undefined},
+    %% Bucket = "Bucket5",
+    %% ok = ?MUT:add_user(State),
+    %% ok = ?MUT:delete_bucket(State, Bucket, undefined),
+    %% ok = ?MUT:put_bucket(State, Bucket, undefined),
+    %% %% ok = ?MUT:get_bucket(State, Bucket),
+    %% ok = ?MUT:delete_bucket(State, Bucket, undefined),
     ok.
