@@ -1,4 +1,4 @@
-%%%----------------------------------------------------------------------
+%%%---------------------------------------------------------
 %%% Copyright (c) 2008-2011 Gemini Mobile Technologies, Inc.  All rights reserved.
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
 %%%
 %%% File    : gmt_time_tests.erl
 %%% Purpose : GMT time test suite
-%%%----------------------------------------------------------------------
+%%%---------------------------------------------------------
 
 -module(s3_client_tests).
 -include("s3.hrl").
@@ -75,10 +75,11 @@ test_001() ->
     Bucket = "Bucket001",
     Key = "Key001",
     Value = "Value001",
+    ValueBin = list_to_binary(Value),
     ok = ?MUT:delete_bucket(State, Bucket, undefined),
     ok = ?MUT:put_bucket(State, Bucket, undefined),
     ok = ?MUT:put_object(State, Bucket, Key, Value,undefined),
-    {ok,Value} =
+    {ok,ValueBin} =
 	?MUT:get_object(State, Bucket, Key, undefined),
     ok = ?MUT:delete_object(State, Bucket, Key, undefined),
     ok = ?MUT:delete_bucket(State, Bucket, undefined),
