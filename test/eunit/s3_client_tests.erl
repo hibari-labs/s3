@@ -59,10 +59,11 @@ test_000() ->
     AuthKey=undefined,
     State =
 	?MUT:make_state("localhost",23580,Id,AuthKey),
+    ACL = undefined,
     Bucket = "Bucket000",
-    ok = ?MUT:delete_bucket(State, Bucket, undefined),
-    ok = ?MUT:put_bucket(State, Bucket, undefined),
-    ok = ?MUT:delete_bucket(State, Bucket, undefined),
+    ok = ?MUT:delete_bucket(State, Bucket, ACL),
+    ok = ?MUT:put_bucket(State, Bucket, ACL),
+    ok = ?MUT:delete_bucket(State, Bucket, ACL),
     ok.
 
 test_001() ->
@@ -72,17 +73,18 @@ test_001() ->
     AuthKey=undefined,
     State =
 	?MUT:make_state("localhost",23580,Id,AuthKey),
+    ACL = undefined,
     Bucket = "Bucket001",
     Key = "Key001",
     Value = "Value001",
     ValueBin = list_to_binary(Value),
-    ok = ?MUT:delete_bucket(State, Bucket, undefined),
-    ok = ?MUT:put_bucket(State, Bucket, undefined),
-    ok = ?MUT:put_object(State, Bucket, Key, Value,undefined),
+    ok = ?MUT:delete_bucket(State, Bucket, ACL),
+    ok = ?MUT:put_bucket(State, Bucket, ACL),
+    ok = ?MUT:put_object(State, Bucket, Key, Value,ACL),
     {ok,ValueBin} =
-	?MUT:get_object(State, Bucket, Key, undefined),
-    ok = ?MUT:delete_object(State, Bucket, Key, undefined),
-    ok = ?MUT:delete_bucket(State, Bucket, undefined),
+	?MUT:get_object(State, Bucket, Key, ACL),
+    ok = ?MUT:delete_object(State, Bucket, Key, ACL),
+    ok = ?MUT:delete_bucket(State, Bucket, ACL),
     ok.
 
 test_zzz() ->
