@@ -14,12 +14,15 @@ make_auth(Op, KeyID, Key, Uri, H0) ->
         end,
     
     Method = string:to_upper(atom_to_list(Op)),
+    H0low = lists:map(fun({A,B}) ->
+				{string:to_lower(A), B}
+			end, H0),
     make_auth(KeyID, Key,
 	      Method,
 	      %% todo: ignore cases
-              proplists:get_value("Content-md5", H0, ""),
-              proplists:get_value("Content-type", H0, ""),
-              proplists:get_value("Date", H0, ""),
+              proplists:get_value("content-md5", H0low, ""),
+              proplists:get_value("content-type", H0low, ""),
+              proplists:get_value("date", H0low, ""),
               AmzHeaders,
               Resource, H0).
 
