@@ -55,10 +55,10 @@ test_teardown(_) ->
 test_000() ->
     application:start(inets),
     %% assuming s3 server is running on port 23580
-    State = #state{host = "localhost",
-    		   port = 23580,
-    		   id = "12345",
-    		   auth_key = undefined},
+    Id = "12345",
+    AuthKey=undefined,
+    State =
+	?MUT:make_state("localhost",23580,Id,AuthKey),
     Bucket = "Bucket000",
     ok = ?MUT:delete_bucket(State, Bucket, undefined),
     ok = ?MUT:put_bucket(State, Bucket, undefined),
@@ -68,10 +68,10 @@ test_000() ->
 test_001() ->
     application:start(inets),
     %% assuming s3 server is running on port 23580
-    State = #state{host = "localhost",
-    		   port = 23580,
-    		   id = "12345",
-    		   auth_key = undefined},
+    Id = "12345",
+    AuthKey=undefined,
+    State =
+	?MUT:make_state("localhost",23580,Id,AuthKey),
     Bucket = "Bucket001",
     Key = "Key001",
     Value = "Value001",

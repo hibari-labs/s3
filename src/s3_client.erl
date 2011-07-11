@@ -2,6 +2,7 @@
 -include("s3.hrl").
 
 -export([
+	 make_state/4,
 	 put_object/5,
 	 put_bucket/3,
 	 delete_bucket/3,
@@ -14,6 +15,14 @@
 -type state() :: #state{}.
 
 %% --- external API ----------------------------------------
+-spec make_state(string(), integer(), string(), string()) ->
+			state().
+%% @spec make_state(string(),integer(),string(),string())
+%%                  ->  state()
+%% @doc  make "state" record
+make_state(Host, Port, Id, AuthKey) ->
+    #state{host=Host, port=Port, id=Id, auth_key=AuthKey}.
+
 -spec put_object(state(),string(),string(),binary(),term()) ->
 			ok|error().
 %% @spec put_object(state(),string(),string(),binary(),term())
