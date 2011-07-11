@@ -6,4 +6,5 @@
 .eunit/
 erl_crash.dump
 *~
-/root
+root
+doc
