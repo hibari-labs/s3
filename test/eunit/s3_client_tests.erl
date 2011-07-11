@@ -35,8 +35,8 @@ all_tests_(Setup,Teardown) ->
      Setup,
      Teardown,
      [
-      %% ?_test(test_000()),
-      %% ?_test(test_001()),
+      ?_test(test_000()),
+      ?_test(test_001()),
       ?_test(test_zzz())
      ]
     }.

@@ -10,14 +10,31 @@
 	 get_bucket/2
 	]).
 
+-type error() :: any(). %% todo
+-type state() :: #state{}.
+
 %% --- external API ----------------------------------------
-%% @spec (#state(), string(), string(), binary(), term())
-%%         -> ok|term()
+-spec put_object(state(),string(),string(),binary(),term()) ->
+			ok|error().
+%% @spec put_object(state(),string(),string(),binary(),term())
+%%        ->	ok|error()
 %% @doc  send PUT OBJECT request
 put_object(State, Bucket, Key, Val, ACL) ->
     do_object(put, State, Bucket, Key, Val, ACL).
+
+-spec delete_object(state(),string(),binary(),term()) ->
+			   ok|error().
+%% @spec delete_object(state(),string(),binary(),term())
+%%        ->	ok|error()
+%% @doc send DELETE OBJECT request
 delete_object(State, Bucket, Key, ACL) ->
     do_object(delete, State, Bucket, Key, undefined, ACL).
+
+-spec get_object(state(),string(),binary(),term()) ->
+			ok|error().
+%% @spec get_object(state(),string(),binary(),term())
+%%        ->	ok|error()
+%% @doc send GET OBJECT request
 get_object(State, Bucket, Key, ACL) ->
     do_object(get, State, Bucket, Key, undefined, ACL).
 
