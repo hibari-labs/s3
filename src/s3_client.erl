@@ -56,22 +56,25 @@ get_bucket(State, Bucket) ->
 
 %%--- internal ---------------------------------------------
 do_object(Op, State, Bucket, Key, Val, _ACL) ->
-    #state{host=Host, port=Port,
-	   id=Id, auth_key=AuthKey} = State,
-    Header0 = [{"Host",Host},{"connection","close"}],
-    Header = make_auth(Id, Header0, AuthKey),
-    URL = "http://"++Host++":"++integer_to_list(Port)
-	++"/"++Bucket++"/"++Key,
-    do_client(Op, URL, Header, "text/plain", Val).
+    Short = "/"++Bucket++"/"++Key,
+    do_req(Op, State, Short, Val, _ACL).
 
 do_bucket(Op, State, Bucket, _ACL) ->
+    Short = "/"++Bucket,
+    Val = "",
+    do_req(Op, State, Short, Val, _ACL).
+
+do_req(Op, State, Short, Val, _ACL) ->
     #state{host=Host, port=Port,
 	   id=Id, auth_key=AuthKey} = State,
-    Header0 = [{"Host",Host},{"connection","close"}],
-    Header = make_auth(Id, Header0, AuthKey),
-    URL = "http://"++Host++":"++integer_to_list(Port)
-	++"/"++Bucket,
-    do_client(Op, URL, Header, "text/plain", "").
+    Date = httpd_util:rfc1123_date(),
+    Header0 = [{"Host",Host},{"Connection","close"},
+	       {"Content-type", "text/plain"},
+	       {"Date",Date}],
+    Header =
+	s3_utils:make_auth(Op, Id, AuthKey, Short, Header0),
+    URL = "http://"++Host++":"++integer_to_list(Port)++Short,
+    do_client(Op, URL, Header, "text/plain", Val).
 
 do_client(Op, URL, Header, CType, Body) ->
     Req = case Op of
@@ -89,12 +92,11 @@ do_client(Op, URL, Header, CType, Body) ->
 
 fix_resp(get, {ok, {_Resp,_Header,Body}}) ->
     {ok, Body};
-fix_resp(_, {ok,_}) ->
+fix_resp(delete, {ok,{{_,204,_},_,_}}) ->
+    ok;
+fix_resp(_, {ok,{{_,200,_},_,_}}) ->
     ok;
 fix_resp(_, Err) ->
     Err.
     
-make_auth(Id, H0, _Key) ->
-    Sig = "todo",
-    [{"Authorization","AWS "++ Id++":"++Sig}|H0].
     

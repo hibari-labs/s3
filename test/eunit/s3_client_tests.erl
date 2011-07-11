@@ -26,6 +26,9 @@
 -define(MUT, s3_client). % Module Under Test (a.k.a. DUT)
 -define(ATM, ?MODULE). % Automatic Test Module (a.k.a. ATE)
 
+-define(FIELD_KEY, "x-amz-key").
+-define(FIELD_KEYID, "x-amz-key-id").
+
 all_tests_test_() ->
     all_tests_(fun test_setup/0,
                fun test_teardown/1).
@@ -36,7 +39,7 @@ all_tests_(Setup,Teardown) ->
      Teardown,
      [
       ?_test(test_000()),
-      ?_test(test_001()),
+      %% ?_test(test_001()),
       ?_test(test_zzz())
      ]
     }.
@@ -54,9 +57,10 @@ test_teardown(_) ->
 
 test_000() ->
     application:start(inets),
+    %% provisioning
+    {ok, Id, AuthKey} = add_user("test_user000"),
+
     %% assuming s3 server is running on port 23580
-    Id = "12345",
-    AuthKey=undefined,
     State =
 	?MUT:make_state("localhost",23580,Id,AuthKey),
     ACL = undefined,
@@ -68,9 +72,10 @@ test_000() ->
 
 test_001() ->
     application:start(inets),
+    %% provisioning
+    {ok, Id, AuthKey} = add_user("test_user001"),
+
     %% assuming s3 server is running on port 23580
-    Id = "12345",
-    AuthKey=undefined,
     State =
 	?MUT:make_state("localhost",23580,Id,AuthKey),
     ACL = undefined,
@@ -89,3 +94,19 @@ test_001() ->
 
 test_zzz() ->
     ok.
+
+%% ---- internal ---
+add_user(Name) ->
+    %% gdss_s3_proto's extention for provisioning
+    Host = "localhost",
+    Port = 23580,
+    Header = [{"Host",Host},{"connection","close"},
+	      {"x-amz-name",Name}],
+    URL = "http://"++Host++":"++integer_to_list(Port)
+	++"/",
+    Req = {URL, Header, "text/plain", ""},
+    {ok,{_,HDR,_}} = httpc:request(put, Req, [], []),
+    {?FIELD_KEYID,KeyId}=lists:keyfind(?FIELD_KEYID,1,HDR),
+    {?FIELD_KEY,Key}=lists:keyfind(?FIELD_KEY,1,HDR),
+					  
+    {ok, KeyId, Key}.
