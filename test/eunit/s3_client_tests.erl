@@ -19,28 +19,70 @@
 
 -module(s3_client_tests).
 -include("s3.hrl").
+-compile(export_all).
 
 -include_lib("eunit/include/eunit.hrl").
 
 -define(MUT, s3_client). % Module Under Test (a.k.a. DUT)
 -define(ATM, ?MODULE). % Automatic Test Module (a.k.a. ATE)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+all_tests_test_() ->
+    all_tests_(fun test_setup/0,
+               fun test_teardown/1).
+
+all_tests_(Setup,Teardown) ->
+    {setup,
+     Setup,
+     Teardown,
+     [
+      %% ?_test(test_000()),
+      %% ?_test(test_001()),
+      ?_test(test_zzz())
+     ]
+    }.
+
+test_setup() ->
+    ok.
+
+test_teardown(_) ->
+    ok.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% Test Cases
 %%
 
-start_1_000_test() ->
-    %% application:start(inets),
-    %% %% assuming gdss_s3_proto si running on port 23580
-    %% State = #state{host = "localhost",
-    %% 		   port = 23580,
-    %% 		   id = "12345",
-    %% 		   auth_key = undefined},
-    %% Bucket = "Bucket5",
-    %% ok = ?MUT:add_user(State),
-    %% ok = ?MUT:delete_bucket(State, Bucket, undefined),
-    %% ok = ?MUT:put_bucket(State, Bucket, undefined),
-    %% %% ok = ?MUT:get_bucket(State, Bucket),
-    %% ok = ?MUT:delete_bucket(State, Bucket, undefined),
+test_000() ->
+    application:start(inets),
+    %% assuming s3 server is running on port 23580
+    State = #state{host = "localhost",
+    		   port = 23580,
+    		   id = "12345",
+    		   auth_key = undefined},
+    Bucket = "Bucket000",
+    ok = ?MUT:delete_bucket(State, Bucket, undefined),
+    ok = ?MUT:put_bucket(State, Bucket, undefined),
+    ok = ?MUT:delete_bucket(State, Bucket, undefined),
+    ok.
+
+test_001() ->
+    application:start(inets),
+    %% assuming s3 server is running on port 23580
+    State = #state{host = "localhost",
+    		   port = 23580,
+    		   id = "12345",
+    		   auth_key = undefined},
+    Bucket = "Bucket001",
+    Key = "Key001",
+    Value = "Value001",
+    ok = ?MUT:delete_bucket(State, Bucket, undefined),
+    ok = ?MUT:put_bucket(State, Bucket, undefined),
+    ok = ?MUT:put_object(State, Bucket, Key, Value,undefined),
+    {ok,Value} =
+	?MUT:get_object(State, Bucket, Key, undefined),
+    ok = ?MUT:delete_object(State, Bucket, Key, undefined),
+    ok = ?MUT:delete_bucket(State, Bucket, undefined),
+    ok.
+
+test_zzz() ->
     ok.
