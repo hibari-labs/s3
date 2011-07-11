@@ -2,7 +2,10 @@
 -export([make_auth/5]).
 
 make_auth(Op, KeyID, Key, Uri, H0) ->
-    L0 = [NV || {Name,_Value} = NV <- H0,
+    H0low = lists:map(fun({A,B}) ->
+				{string:to_lower(A), B}
+			end, H0),
+    L0 = [NV || {Name,_Value} = NV <- H0low,
 		string:substr(Name, 1, 6) =:= "x-amz-"],
     AmzHeaders = orddict:to_list(orddict:from_list(L0)),
     Resource =
@@ -14,9 +17,6 @@ make_auth(Op, KeyID, Key, Uri, H0) ->
         end,
     
     Method = string:to_upper(atom_to_list(Op)),
-    H0low = lists:map(fun({A,B}) ->
-				{string:to_lower(A), B}
-			end, H0),
     make_auth(KeyID, Key,
 	      Method,
 	      %% todo: ignore cases
