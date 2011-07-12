@@ -5,16 +5,8 @@ make_auth(Op, KeyID, Key, Uri, H0) ->
     H0low = lists:map(fun({A,B}) ->
 				{string:to_lower(A), B}
 			end, H0),
-    L0 = [NV || {Name,_Value} = NV <- H0low,
-		string:substr(Name, 1, 6) =:= "x-amz-"],
-    AmzHeaders = orddict:to_list(orddict:from_list(L0)),
-    Resource =
-        case string:tokens(Uri, "?") of
-            [Path, _Qs] ->
-                Path;
-            [Path] ->
-                Path
-        end,
+    AmzHeaders = fix_header(H0low),
+    Resource = fix_resource(Uri),
     
     Method = string:to_upper(atom_to_list(Op)),
     make_auth(KeyID, Key,
@@ -35,8 +27,24 @@ make_auth(KeyID, KeyData, Verb, ContentMD5, ContentType,
          Date, "\n",
          AmzHeaders,
          Resource],
-
+    io:format("::::~p:::::~n",[StringToSign]),
     Signature = base64:encode_to_string(
 		  crypto:sha_mac(KeyData,StringToSign)),
     [{"authorization","AWS"++" "++KeyID++":"++Signature}|H0].
+
+fix_header(Header) ->
+    %% todo
+    L0 = [Name++":"++Value ||
+	     {Name, Value} <- Header,
+	     string:substr(Name, 1, 6) =:= "x-amz-"],
+    orddict:to_list(orddict:from_list(L0)).
+
+fix_resource(Uri) ->
+    %% todo
+    case string:tokens(Uri, "?") of
+	[Path, _Qs] ->
+	    Path;
+	[Path] ->
+	    Path
+    end.
     
