@@ -5,9 +5,9 @@
 	 make_state/4,
 	 put_object/5,
 	 put_bucket/3,
-	 delete_bucket/3,
-	 delete_object/4,
-	 get_object/4,
+	 delete_bucket/2,
+	 delete_object/3,
+	 get_object/3,
 	 get_bucket/2
 	]).
 
@@ -31,26 +31,26 @@ make_state(Host, Port, Id, AuthKey) ->
 put_object(State, Bucket, Key, Val, ACL) ->
     do_object(put, State, Bucket, Key, Val, ACL).
 
--spec delete_object(state(),string(),binary(),term()) ->
+-spec delete_object(state(),string(),binary()) ->
 			   ok|error().
-%% @spec delete_object(state(),string(),binary(),term())
+%% @spec delete_object(state(),string(),binary())
 %%        ->	ok|error()
 %% @doc send DELETE OBJECT request
-delete_object(State, Bucket, Key, ACL) ->
-    do_object(delete, State, Bucket, Key, undefined, ACL).
+delete_object(State, Bucket, Key) ->
+    do_object(delete,State,Bucket,Key,undefined,undefined).
 
--spec get_object(state(),string(),binary(),term()) ->
+-spec get_object(state(),string(),binary()) ->
 			ok|error().
-%% @spec get_object(state(),string(),binary(),term())
+%% @spec get_object(state(),string(),binary())
 %%        ->	ok|error()
 %% @doc send GET OBJECT request
-get_object(State, Bucket, Key, ACL) ->
-    do_object(get, State, Bucket, Key, undefined, ACL).
+get_object(State, Bucket, Key) ->
+    do_object(get, State, Bucket, Key, undefined, undefined).
 
 put_bucket(State, Bucket, ACL) ->
     do_bucket(put, State, Bucket, ACL).
-delete_bucket(State, Bucket, ACL) ->
-    do_bucket(delete, State, Bucket, ACL).
+delete_bucket(State, Bucket) ->
+    do_bucket(delete, State, Bucket,undefined).
 get_bucket(State, Bucket) ->
     do_bucket(get, State, Bucket, undefined).
 
