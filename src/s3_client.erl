@@ -2,7 +2,7 @@
 -include("s3.hrl").
 
 -export([
-	 make_state/4,
+	 make_state/5,
 	 put_object/5,
 	 put_bucket/3,
 	 delete_bucket/2,
@@ -15,13 +15,14 @@
 -type state() :: #state{}.
 
 %% --- external API ----------------------------------------
--spec make_state(string(), integer(), string(), string()) ->
-			state().
-%% @spec make_state(string(),integer(),string(),string())
-%%                  ->  state()
+-spec make_state(string(), integer(), string(), string(),
+		atom()) -> state().
+%% @spec make_state(string(),integer(),string(),string(),
+%%              atom()) -> state()
 %% @doc  make "state" record
-make_state(Host, Port, Id, AuthKey) ->
-    #state{host=Host, port=Port, id=Id, auth_key=AuthKey}.
+make_state(Host, Port, Id, AuthKey, Style) ->
+    #state{host=Host, port=Port, id=Id, auth_key=AuthKey,
+	   style=Style}.
 
 -spec put_object(state(),string(),string(),binary(),term()) ->
 			ok|error().
@@ -56,24 +57,38 @@ get_bucket(State, Bucket) ->
 
 %%--- internal ---------------------------------------------
 do_object(Op, State, Bucket, Key, Val, _ACL) ->
-    Short = "/"++Bucket++"/"++Key,
-    do_req(Op, State, Short, Val, _ACL).
+    #state{host=Host0, style=Style} = State,
+    {Host, Path} = 
+	case Style of
+	    ?S3_PATH_STYLE ->
+		{Host0, "/"++Bucket++"/"++Key};
+	    ?S3_VIRTUAL_HOSTED_STYLE ->
+		{Bucket++"."++Host0, "/"++Key}
+	end,
+    do_req(Op, State, Host, Path, Val, _ACL).
 
 do_bucket(Op, State, Bucket, _ACL) ->
-    Short = "/"++Bucket,
+    #state{host=Host0, style=Style} = State,
+    {Host, Path} = 
+	case Style of
+	    ?S3_PATH_STYLE ->
+		{Host0, "/"++Bucket};
+	    ?S3_VIRTUAL_HOSTED_STYLE ->
+		{Bucket++"."++Host0, "/"}
+	end,
     Val = "",
-    do_req(Op, State, Short, Val, _ACL).
+    do_req(Op, State, Host, Path, Val, _ACL).
 
-do_req(Op, State, Short, Val, _ACL) ->
-    #state{host=Host, port=Port,
+do_req(Op, State, Host, Path, Val, _ACL) ->
+    #state{port=Port,
 	   id=Id, auth_key=AuthKey} = State,
     Date = httpd_util:rfc1123_date(),
     Header0 = [{"Host",Host},{"Connection","close"},
 	       {"Content-type", "text/plain"},
 	       {"Date",Date}],
     Header =
-	s3_utils:make_auth(Op, Id, AuthKey, Short, Header0),
-    URL = "http://"++Host++":"++integer_to_list(Port)++Short,
+	s3_utils:make_auth(Op, Id, AuthKey, Path, Header0),
+    URL = "http://"++Host++":"++integer_to_list(Port)++Path,
     do_client(Op, URL, Header, "text/plain", Val).
 
 do_client(Op, URL, Header, CType, Body) ->

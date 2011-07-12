@@ -59,10 +59,11 @@ test_000() ->
     application:start(inets),
     %% provisioning
     {ok, Id, AuthKey} = add_user("test_user000"),
+    Style = ?S3_PATH_STYLE,
 
     %% assuming s3 server is running on port 23580
     State =
-	?MUT:make_state("localhost",23580,Id,AuthKey),
+	?MUT:make_state("localhost",23580,Id,AuthKey,Style),
     ACL = undefined,
     Bucket = "Bucket000",
     ok = ?MUT:delete_bucket(State, Bucket),
@@ -75,10 +76,11 @@ test_001() ->
     application:start(inets),
     %% provisioning
     {ok, Id, AuthKey} = add_user("test_user001"),
+    Style = ?S3_PATH_STYLE,
 
     %% assuming s3 server is running on port 23580
     State =
-	?MUT:make_state("localhost",23580,Id,AuthKey),
+	?MUT:make_state("localhost",23580,Id,AuthKey,Style),
     ACL = undefined,
     Bucket = "Bucket001",
     Key = "Key001",
