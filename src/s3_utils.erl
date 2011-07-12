@@ -27,20 +27,22 @@ make_auth(KeyID, KeyData, Verb, ContentMD5, ContentType,
          Date, "\n",
          AmzHeaders,
          Resource],
-    io:format("::::~p:::::~n",[StringToSign]),
     Signature = base64:encode_to_string(
 		  crypto:sha_mac(KeyData,StringToSign)),
     [{"authorization","AWS"++" "++KeyID++":"++Signature}|H0].
 
 fix_header(Header) ->
-    %% todo
-    L0 = [Name++":"++Value ||
+    %% todo - header fields with the same name into one field
+    %%      - unfold long field  
+    L0 = [{Name,Value} ||
 	     {Name, Value} <- Header,
 	     string:substr(Name, 1, 6) =:= "x-amz-"],
-    orddict:to_list(orddict:from_list(L0)).
+    lists:map(fun({N,V}) -> N++":"++V++"\n" end,
+	      orddict:to_list(orddict:from_list(L0))).
 
 fix_resource(Uri) ->
-    %% todo
+    %% todo - prepend bucket for virtual-hosted style
+    %%      - subresources like "?versioning"
     case string:tokens(Uri, "?") of
 	[Path, _Qs] ->
 	    Path;
