@@ -76,8 +76,8 @@ do_bucket(Op, State, Bucket, _ACL) ->
 	    ?S3_PATH_STYLE ->
 		{Host0, "/"++Bucket, "/"++Bucket};
 	    ?S3_VIRTUAL_HOSTED_STYLE ->
-		{Bucket++"."++Host0, "/"++Bucket,
-		 "/"++Bucket}
+		{Bucket++"."++Host0, "/",
+		 "/"++Bucket++"/"}
 	end,
     Val = "",
     do_req(Op, State, Host, Path, AuthPath, Val, _ACL).
