@@ -30,17 +30,19 @@
 -define(FIELD_KEYID, "x-amz-key-id").
 
 all_tests_test_() ->
-    all_tests_(fun test_setup/0,
-               fun test_teardown/1).
+    State = server_info(),
+    all_tests_(State,
+	       fun test_setup/0,
+	       fun test_teardown/1).
 
-all_tests_(Setup,Teardown) ->
+all_tests_(State,Setup,Teardown) ->
     {setup,
      Setup,
      Teardown,
      [
-      %% ?_test(test_000()),
-      %% ?_test(test_001()),
-      ?_test(test_zzz())
+      ?_test(test_000(State)),
+      ?_test(test_001(State)),
+      ?_test(test_zzz(State))
      ]
     }.
 
@@ -50,20 +52,30 @@ test_setup() ->
 test_teardown(_) ->
     ok.
 
+server_info() ->
+    Env = os:getenv("S3_TEST_SERVER"),
+    if Env==false ->
+	    undefined;
+       true ->
+	    server_info0(string:tokens(Env, ":"))
+    end.
+
+server_info0(["hibari"|_]) ->
+    application:start(inets),
+    %% provisioning
+    {ok, Id, AuthKey} = add_user("test_user000"),
+    Style = ?S3_PATH_STYLE,
+        %% assuming s3 server is running on port 23580
+    ?MUT:make_state("localhost",23580,Id,AuthKey,Style).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% Test Cases
 %%
 
-test_000() ->
-    application:start(inets),
-    %% provisioning
-    {ok, Id, AuthKey} = add_user("test_user000"),
-    Style = ?S3_PATH_STYLE,
-
-    %% assuming s3 server is running on port 23580
-    State =
-	?MUT:make_state("localhost",23580,Id,AuthKey,Style),
+test_000(undefined) ->
+    ok;
+test_000(State) ->
     ACL = undefined,
     Bucket = "Bucket000",
     ok = ?MUT:delete_bucket(State, Bucket),
@@ -72,15 +84,9 @@ test_000() ->
     ok = ?MUT:delete_bucket(State, Bucket),
     ok.
 
-test_001() ->
-    application:start(inets),
-    %% provisioning
-    {ok, Id, AuthKey} = add_user("test_user001"),
-    Style = ?S3_PATH_STYLE,
-
-    %% assuming s3 server is running on port 23580
-    State =
-	?MUT:make_state("localhost",23580,Id,AuthKey,Style),
+test_001(undefined) ->
+    ok;
+test_001(State) ->
     ACL = undefined,
     Bucket = "Bucket001",
     Key = "Key001",
@@ -96,7 +102,7 @@ test_001() ->
     ok = ?MUT:delete_bucket(State, Bucket),
     ok.
 
-test_zzz() ->
+test_zzz(_) ->
     ok.
 
 %% ---- internal ---
