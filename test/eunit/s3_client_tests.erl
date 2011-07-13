@@ -87,7 +87,7 @@ test_000(undefined) ->
     ok;
 test_000(State) ->
     ACL = undefined,
-    Bucket = "Bucket000",
+    Bucket = "bucket000",
     ok = ?MUT:delete_bucket(State, Bucket),
     ok = ?MUT:put_bucket(State, Bucket, ACL),
     {ok,_R} = ?MUT:get_bucket(State, Bucket),
@@ -98,7 +98,7 @@ test_001(undefined) ->
     ok;
 test_001(State) ->
     ACL = undefined,
-    Bucket = "Bucket001",
+    Bucket = "bucket001",
     Key = "Key001",
     Value = "Value001",
     ValueBin = list_to_binary(Value),
