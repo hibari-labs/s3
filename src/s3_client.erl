@@ -7,6 +7,7 @@
 	 put_bucket/3,
 	 delete_bucket/2,
 	 delete_object/3,
+	 get_service/1,
 	 get_object/3,
 	 get_bucket/2
 	]).
@@ -24,6 +25,23 @@ make_state(Host, Port, Id, AuthKey, Style) ->
     #state{host=Host, port=Port, id=Id, auth_key=AuthKey,
 	   style=Style}.
 
+
+%% === SERVICE================
+-spec get_service(state()) -> ok|error().
+%% @spec get_object(state()) -> ok|error()
+%% @doc send GET SERVICE request
+get_service(State) ->
+    Op = get,
+    Host = State#state.host,
+    Path = "/",
+    AuthPath = "/",
+    Val = "",
+    ACL = undefined,
+    do_req(Op, State, Host, Path, AuthPath, Val, ACL).
+
+
+
+%% === OBJECT ================
 -spec put_object(state(),string(),string(),binary(),term())
 		-> ok|error().
 %% @spec put_object(state(),string(),string(),binary(),term())
@@ -48,6 +66,9 @@ delete_object(State, Bucket, Key) ->
 get_object(State, Bucket, Key) ->
     do_object(get, State, Bucket, Key, undefined, undefined).
 
+
+
+%% === BUKCET ================
 -spec put_bucket(state(),string(),term())
 		-> ok|error().
 %% @spec put_object(state(),string(),term())

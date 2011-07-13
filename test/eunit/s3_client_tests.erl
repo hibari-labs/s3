@@ -88,6 +88,7 @@ test_000(undefined) ->
 test_000(State) ->
     ACL = undefined,
     Bucket = "bucket000",
+    {ok,_XML} = ?MUT:get_service(State),
     ok = ?MUT:delete_bucket(State, Bucket),
     ok = ?MUT:put_bucket(State, Bucket, ACL),
     {ok,_R} = ?MUT:get_bucket(State, Bucket),
@@ -102,6 +103,7 @@ test_001(State) ->
     Key = "Key001",
     Value = "Value001",
     ValueBin = list_to_binary(Value),
+    {ok,_XML} = ?MUT:get_service(State),
     ok = ?MUT:delete_bucket(State, Bucket),
     ok = ?MUT:put_bucket(State, Bucket, ACL),
     ok = ?MUT:put_object(State, Bucket, Key, Value,ACL),
