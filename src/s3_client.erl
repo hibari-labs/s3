@@ -37,7 +37,9 @@ get_service(State) ->
     AuthPath = "/",
     Val = "",
     ACL = undefined,
-    do_req(Op, State, Host, Path, AuthPath, Val, ACL).
+    {ok,XML} =
+	do_req(Op, State, Host, Path, AuthPath, Val, ACL),
+    s3_utils:xml_service(XML).
 
 
 

@@ -8,3 +8,9 @@
 		style    :: ?S3_PATH_STYLE |
                             ?S3_VIRTUAL_HOSTED_STYLE}).
 
+
+-record(owner, {id           :: string(),
+		display_name :: string()}).
+
+-record(bucket, {name        :: string(),
+		 create_date :: string()}).

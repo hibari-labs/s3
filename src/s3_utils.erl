@@ -1,5 +1,8 @@
 -module(s3_utils).
--export([make_auth/5]).
+-export([make_auth/5,
+	 xml_service/1]).
+
+-include_lib("xmerl/include/xmerl.hrl").
 
 make_auth(Op, KeyID, Key, Uri, H0) ->
     H0low = lists:map(fun({A,B}) ->
@@ -50,3 +53,20 @@ fix_resource(Uri) ->
 	    Path
     end.
     
+xml_service(XML) ->
+    {Top, []} = xmerl_scan:string(binary_to_list(XML)),
+    ReturnL =
+	lists:foldl(fun service0/2, [], Top#xmlElement.content),
+    {ok, ReturnL}.
+
+service0(#xmlElement{name=Name,content=Cntnt}, Acc) ->
+    case Name of
+	'Owner' ->
+	    [Cntnt|Acc];
+	'Buckets' ->
+	    [Cntnt|Acc];
+	_ ->
+	     Acc
+    end;
+service0(_,Acc) ->
+    Acc.
