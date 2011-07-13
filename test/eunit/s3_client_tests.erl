@@ -121,8 +121,6 @@ test_001(State,_) ->
 %% --- get service
 test_002(undefined,_) ->
     ok;
-test_002(_,hibari) ->
-    ok; %% hibari s3 does not retrun correct response
 test_002(State,_) ->
     ACL = undefined,
     Bucket = "bucket002",
