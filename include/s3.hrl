@@ -4,7 +4,7 @@
 -record(state, {host     :: string(),
 		port     :: integer(),
 		id       :: string(),
-		auth_key :: binary(),
+		auth_key :: string(),
 		style    :: ?S3_PATH_STYLE |
                             ?S3_VIRTUAL_HOSTED_STYLE}).
 

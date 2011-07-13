@@ -11,12 +11,12 @@
 	 get_bucket/2
 	]).
 
-%% -type error() :: any(). %% todo
-%% -type state() :: #state{}.
+-type error() :: any(). %% todo
+-type state() :: #state{}.
 
 %% --- external API ----------------------------------------
-%% -spec make_state(string(), integer(), string(), string(),
-%% 		atom()) -> state().
+-spec make_state(string(), integer(), string(), string(),
+		 atom()) -> state().
 %% @spec make_state(string(),integer(),string(),string(),
 %%              atom()) -> state()
 %% @doc  make "state" record
@@ -24,25 +24,25 @@ make_state(Host, Port, Id, AuthKey, Style) ->
     #state{host=Host, port=Port, id=Id, auth_key=AuthKey,
 	   style=Style}.
 
-%% -spec put_object(state(),string(),string(),binary(),term()) ->
-%% 			ok|error().
+-spec put_object(state(),string(),string(),binary(),term())
+		-> ok|error().
 %% @spec put_object(state(),string(),string(),binary(),term())
 %%        ->	ok|error()
 %% @doc  send PUT OBJECT request
 put_object(State, Bucket, Key, Val, ACL) ->
     do_object(put, State, Bucket, Key, Val, ACL).
 
-%% -spec delete_object(state(),string(),binary()) ->
-%% 			   ok|error().
-%% @spec delete_object(state(),string(),binary())
+-spec delete_object(state(),string(),string())
+		   -> ok|error().
+%% @spec delete_object(state(),string(),string())
 %%        ->	ok|error()
 %% @doc send DELETE OBJECT request
 delete_object(State, Bucket, Key) ->
     do_object(delete,State,Bucket,Key,undefined,undefined).
 
-%% -spec get_object(state(),string(),binary()) ->
-%% 			ok|error().
-%% @spec get_object(state(),string(),binary())
+-spec get_object(state(),string(),string())
+		-> ok|error().
+%% @spec get_object(state(),string(),string())
 %%        ->	ok|error()
 %% @doc send GET OBJECT request
 get_object(State, Bucket, Key) ->
