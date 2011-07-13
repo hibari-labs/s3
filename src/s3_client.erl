@@ -112,6 +112,8 @@ fix_resp(get, {ok, {_Resp,_Header,Body}}) ->
     {ok, Body};
 fix_resp(delete, {ok,{{_,204,_},_,_}}) ->
     ok;
+fix_resp(delete, {ok,{{_,404,_},_,_}}) ->
+    ok;
 fix_resp(_, {ok,{{_,200,_},_,_}}) ->
     ok;
 fix_resp(_, Err) ->
