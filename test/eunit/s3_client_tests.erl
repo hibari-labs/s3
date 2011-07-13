@@ -71,8 +71,8 @@ server_info0(["hibari"|_]) ->
 server_info0([Type,Host,P0,Id,AuthKey]) when
       Type=="cloudian" orelse Type=="amz" ->
     Port = list_to_integer(P0),
-    %% Style = ?S3_VIRTUAL_HOSTED_STYLE,
-    Style = ?S3_PATH_STYLE,
+    Style = ?S3_VIRTUAL_HOSTED_STYLE,
+    %% Style = ?S3_PATH_STYLE,
     ?MUT:make_state(Host,Port,Id,AuthKey,Style);
 
 server_info0(_) ->

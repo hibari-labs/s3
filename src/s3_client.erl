@@ -58,28 +58,31 @@ get_bucket(State, Bucket) ->
 %%--- internal ---------------------------------------------
 do_object(Op, State, Bucket, Key, Val, _ACL) ->
     #state{host=Host0, style=Style} = State,
-    {Host, Path} = 
+    {Host, Path, AuthPath} = 
 	case Style of
 	    ?S3_PATH_STYLE ->
-		{Host0, "/"++Bucket++"/"++Key};
+		{Host0, "/"++Bucket++"/"++Key,
+		 "/"++Bucket++"/"++Key};
 	    ?S3_VIRTUAL_HOSTED_STYLE ->
-		{Bucket++"."++Host0, "/"++Key}
+		{Bucket++"."++Host0, "/"++Key,
+		 "/"++Bucket++"/"++Key}
 	end,
-    do_req(Op, State, Host, Path, Val, _ACL).
+    do_req(Op, State, Host, Path, AuthPath, Val, _ACL).
 
 do_bucket(Op, State, Bucket, _ACL) ->
     #state{host=Host0, style=Style} = State,
-    {Host, Path} = 
+    {Host, Path, AuthPath} = 
 	case Style of
 	    ?S3_PATH_STYLE ->
-		{Host0, "/"++Bucket};
+		{Host0, "/"++Bucket, "/"++Bucket};
 	    ?S3_VIRTUAL_HOSTED_STYLE ->
-		{Bucket++"."++Host0, "/"}
+		{Bucket++"."++Host0, "/"++Bucket,
+		 "/"++Bucket}
 	end,
     Val = "",
-    do_req(Op, State, Host, Path, Val, _ACL).
+    do_req(Op, State, Host, Path, AuthPath, Val, _ACL).
 
-do_req(Op, State, Host, Path, Val, _ACL) ->
+do_req(Op, State, Host, Path, AuthPath, Val, _ACL) ->
     #state{port=Port,
 	   id=Id, auth_key=AuthKey} = State,
     Date = httpd_util:rfc1123_date(),
@@ -87,7 +90,7 @@ do_req(Op, State, Host, Path, Val, _ACL) ->
 	       {"Content-type", "text/plain"},
 	       {"Date",Date}],
     Header =
-	s3_utils:make_auth(Op, Id, AuthKey, Path, Header0),
+	s3_utils:make_auth(Op,Id,AuthKey,AuthPath,Header0),
     URL = "http://"++Host++":"++integer_to_list(Port)++Path,
     do_client(Op, URL, Header, "text/plain", Val).
 
