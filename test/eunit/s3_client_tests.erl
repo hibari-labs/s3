@@ -30,6 +30,7 @@
 -define(FIELD_KEYID, "x-amz-key-id").
 
 all_tests_test_() ->
+    application:start(inets),
     State = server_info(),
     all_tests_(State,
 	       fun test_setup/0,
@@ -61,12 +62,21 @@ server_info() ->
     end.
 
 server_info0(["hibari"|_]) ->
-    application:start(inets),
     %% provisioning
     {ok, Id, AuthKey} = add_user("test_user000"),
     Style = ?S3_PATH_STYLE,
-        %% assuming s3 server is running on port 23580
-    ?MUT:make_state("localhost",23580,Id,AuthKey,Style).
+    %% assuming s3 server is running on port 23580
+    ?MUT:make_state("localhost",23580,Id,AuthKey,Style);
+
+server_info0([Type,Host,P0,Id,AuthKey]) when
+      Type=="cloudian" orelse Type=="amz" ->
+    Port = list_to_integer(P0),
+    %% Style = ?S3_VIRTUAL_HOSTED_STYLE,
+    Style = ?S3_PATH_STYLE,
+    ?MUT:make_state(Host,Port,Id,AuthKey,Style);
+
+server_info0(_) ->
+    undefined.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
