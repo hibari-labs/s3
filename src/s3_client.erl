@@ -48,10 +48,27 @@ delete_object(State, Bucket, Key) ->
 get_object(State, Bucket, Key) ->
     do_object(get, State, Bucket, Key, undefined, undefined).
 
+-spec put_bucket(state(),string(),term())
+		-> ok|error().
+%% @spec put_object(state(),string(),term())
+%%        ->	ok|error()
+%% @doc  send PUT BUCKET request
 put_bucket(State, Bucket, ACL) ->
     do_bucket(put, State, Bucket, ACL).
+
+-spec delete_bucket(state(),string())
+		   -> ok|error().
+%% @spec delete_bucket(state(),string())
+%%        ->	ok|error()
+%% @doc send DELETE BUCKET request
 delete_bucket(State, Bucket) ->
     do_bucket(delete, State, Bucket,undefined).
+
+-spec get_bucket(state(),string())
+		-> ok|error().
+%% @spec get_bucket(state(),string())
+%%        ->	ok|error()
+%% @doc send GET BUCKET request
 get_bucket(State, Bucket) ->
     do_bucket(get, State, Bucket, undefined).
 
