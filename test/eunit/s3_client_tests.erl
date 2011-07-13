@@ -31,19 +31,20 @@
 
 all_tests_test_() ->
     application:start(inets),
-    State = server_info(),
-    all_tests_(State,
+    {State, ServerType} = server_info(),
+    all_tests_(State, ServerType,
 	       fun test_setup/0,
 	       fun test_teardown/1).
 
-all_tests_(State,Setup,Teardown) ->
+all_tests_(State,ServerType,Setup,Teardown) ->
     {setup,
      Setup,
      Teardown,
      [
-      ?_test(test_000(State)),
-      ?_test(test_001(State)),
-      ?_test(test_zzz(State))
+      ?_test(test_000(State,ServerType)),
+      ?_test(test_001(State,ServerType)),
+      ?_test(test_002(State,ServerType)),
+      ?_test(test_zzz(State,ServerType))
      ]
     }.
 
@@ -66,44 +67,47 @@ server_info0(["hibari"|_]) ->
     {ok, Id, AuthKey} = add_user("test_user000"),
     Style = ?S3_PATH_STYLE,
     %% assuming s3 server is running on port 23580
-    ?MUT:make_state("localhost",23580,Id,AuthKey,Style);
+    {?MUT:make_state("localhost",23580,Id,AuthKey,Style),
+     hibari};
 
 server_info0([Type,Host,P0,Id,AuthKey]) when
       Type=="cloudian" orelse Type=="amz" ->
     Port = list_to_integer(P0),
     Style = ?S3_VIRTUAL_HOSTED_STYLE,
     %% Style = ?S3_PATH_STYLE,
-    ?MUT:make_state(Host,Port,Id,AuthKey,Style);
+    {?MUT:make_state(Host,Port,Id,AuthKey,Style),
+     list_to_atom(Type)};
 
 server_info0(_) ->
-    undefined.
+    {undefined, undefined}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% Test Cases
 %%
 
-test_000(undefined) ->
+
+%% --- put, get and delete buckets
+test_000(undefined,_) ->
     ok;
-test_000(State) ->
+test_000(State,_) ->
     ACL = undefined,
     Bucket = "bucket000",
-    {ok,_XML} = ?MUT:get_service(State),
     ok = ?MUT:delete_bucket(State, Bucket),
     ok = ?MUT:put_bucket(State, Bucket, ACL),
     {ok,_R} = ?MUT:get_bucket(State, Bucket),
     ok = ?MUT:delete_bucket(State, Bucket),
     ok.
 
-test_001(undefined) ->
+%% --- put, get and delete objects
+test_001(undefined,_) ->
     ok;
-test_001(State) ->
+test_001(State,_) ->
     ACL = undefined,
     Bucket = "bucket001",
     Key = "Key001",
     Value = "Value001",
     ValueBin = list_to_binary(Value),
-    {ok,_XML} = ?MUT:get_service(State),
     ok = ?MUT:delete_bucket(State, Bucket),
     ok = ?MUT:put_bucket(State, Bucket, ACL),
     ok = ?MUT:put_object(State, Bucket, Key, Value,ACL),
@@ -114,7 +118,21 @@ test_001(State) ->
     ok = ?MUT:delete_bucket(State, Bucket),
     ok.
 
-test_zzz(_) ->
+%% --- get service
+test_002(undefined,_) ->
+    ok;
+test_002(_,hibari) ->
+    ok; %% hibari s3 does not retrun correct response
+test_002(State,_) ->
+    ACL = undefined,
+    Bucket = "bucket002",
+    ok = ?MUT:delete_bucket(State, Bucket),
+    ok = ?MUT:put_bucket(State, Bucket, ACL),
+    {ok,_XML} = ?MUT:get_service(State),
+    ok = ?MUT:delete_bucket(State, Bucket),
+    ok.
+
+test_zzz(_,_) ->
     ok.
 
 %% ---- internal ---
