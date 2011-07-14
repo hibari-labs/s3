@@ -103,22 +103,21 @@ owner0(_,Acc) ->
 buckets0(#xmlElement{name=Name,content=Cntnt}, Acc) ->
     case Name of
 	'Bucket' ->
-	    lists:foldl(fun bucket0/2, Acc, Cntnt);
+	    [lists:foldl(fun bucket0/2,#bucket{},Cntnt)|Acc];
 	_ ->
 	     Acc
     end;
 buckets0(_,Acc) ->
     Acc.
 
-bucket0(#xmlElement{name=Name,content=[Text]}, Buckets) ->
+bucket0(#xmlElement{name=Name,content=[Text]}, Bucket) ->
     case Name of
 	'Name' ->
-	    [#bucket{name=Text#xmlText.value}|Buckets];
+	    Bucket#bucket{name=Text#xmlText.value};
 	'CreationDate' ->
-	    [H|T] = Buckets,
-	    [H#bucket{creation_date=Text#xmlText.value}|T];
+	    Bucket#bucket{creation_date=Text#xmlText.value};
 	_ ->
-	     Buckets
+	     Bucket
     end;
 bucket0(_,Acc) ->
     Acc.
