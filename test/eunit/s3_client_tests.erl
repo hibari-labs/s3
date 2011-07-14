@@ -216,7 +216,7 @@ test_005(State,ServerType) ->
 		 ?MUT:delete_bucket(State, Bucket)),
     ok.
 
-%% --- put, get and delete objects
+%% --- put, head and delete objects
 test_006(undefined,_) ->
     ok;
 test_006(State,ServerType) ->
