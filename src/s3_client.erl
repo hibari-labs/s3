@@ -3,6 +3,7 @@
 
 -export([
 	 make_state/5,
+	 head_object/3,
 	 put_object/5,
 	 put_bucket/3,
 	 delete_bucket/2,
@@ -71,6 +72,13 @@ delete_object(State, Bucket, Key) ->
 get_object(State, Bucket, Key) ->
     do_object(get, State, Bucket, Key, undefined, undefined).
 
+-spec head_object(state(),string(),string())
+		 -> {ok, binary()}.
+%% @spec head_object(state(),string(),string())
+%%        ->	{ok, binary()}
+%% @doc send HEAD OBJECT request
+head_object(State, Bucket, Key) ->
+    do_object(head, State, Bucket, Key, undefined, undefined).
 
 
 %% === BUKCET ================
@@ -153,6 +161,8 @@ do_client(Op, URL, Header, CType, Body) ->
 
 
 
+fix_resp(head, {ok, {_Resp,Header,_Body}}) ->
+    {ok, Header};
 fix_resp(get, {ok, {_Resp,_Header,Body}}) ->
     {ok, Body};
 fix_resp(delete, {ok,{{_,204,_},_,_}}) ->

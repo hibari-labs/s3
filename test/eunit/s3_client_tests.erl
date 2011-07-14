@@ -47,6 +47,7 @@ all_tests_(State,ServerType,Setup,Teardown) ->
       ?_test(test_003(State,ServerType)),
       ?_test(test_004(State,ServerType)),
       ?_test(test_005(State,ServerType)),
+      ?_test(test_006(State,ServerType)),
       ?_test(test_zzz(State,ServerType))
      ]
     }.
@@ -189,7 +190,7 @@ test_004(State,_) ->
 		 ?MUT:delete_bucket(State, Bucket)),
     ok.
 
-%% --- put, get and delete objects
+%% --- get bucket with an object put
 test_005(undefined,_) ->
     ok;
 test_005(State,ServerType) ->
@@ -209,6 +210,29 @@ test_005(State,ServerType) ->
 		 ?MUT:get_object(State, Bucket, Key)),
     ?assertMatch({ok,#list_bucket{name=Bucket}},
 		 ?MUT:get_bucket(State, Bucket)),
+    ?assertEqual(ok,
+		 ?MUT:delete_object(State, Bucket, Key)),
+    ?assertEqual(ok,
+		 ?MUT:delete_bucket(State, Bucket)),
+    ok.
+
+%% --- put, get and delete objects
+test_006(undefined,_) ->
+    ok;
+test_006(State,ServerType) ->
+    ACL = undefined,
+    Bucket = "bucket006",
+    Key = "Key006",
+    Value = "Value006",
+    
+    cleanup(State,Bucket,Key,ServerType),
+
+    ?assertEqual(ok,
+		 ?MUT:put_bucket(State, Bucket, ACL)),
+    ?assertEqual(ok,
+		 ?MUT:put_object(State,Bucket,Key,Value,ACL)),
+    ?assertMatch({ok,_Header},
+		 ?MUT:head_object(State, Bucket, Key)),
     ?assertEqual(ok,
 		 ?MUT:delete_object(State, Bucket, Key)),
     ?assertEqual(ok,
