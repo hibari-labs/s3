@@ -57,7 +57,7 @@ test_teardown(_) ->
 server_info() ->
     Env = os:getenv("S3_TEST_SERVER"),
     if Env==false ->
-	    undefined;
+	    {undefined, undefiend};
        true ->
 	    server_info0(string:tokens(Env, ":"))
     end.
