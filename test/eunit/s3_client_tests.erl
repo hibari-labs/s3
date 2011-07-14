@@ -96,7 +96,7 @@ test_000(State,_) ->
     Bucket = "bucket000",
     ok = ?MUT:delete_bucket(State, Bucket),
     ok = ?MUT:put_bucket(State, Bucket, ACL),
-    {ok,_R} = ?MUT:get_bucket(State, Bucket),
+    {ok,_XML} = ?MUT:get_bucket_xml(State, Bucket),
     ok = ?MUT:delete_bucket(State, Bucket),
     ok.
 
@@ -114,7 +114,7 @@ test_001(State,_) ->
     ok = ?MUT:put_object(State, Bucket, Key, Value,ACL),
     {ok,ValueBin} =
 	?MUT:get_object(State, Bucket, Key),
-    {ok,_R} = ?MUT:get_bucket(State, Bucket),
+    {ok,_XML} = ?MUT:get_bucket_xml(State, Bucket),
     ok = ?MUT:delete_object(State, Bucket, Key),
     ok = ?MUT:delete_bucket(State, Bucket),
     ok.

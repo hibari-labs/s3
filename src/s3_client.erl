@@ -10,7 +10,7 @@
 	 get_service/1,
 	 get_service_xml/1,
 	 get_object/3,
-	 get_bucket/2
+	 get_bucket_xml/2
 	]).
 
 -type state() :: #state{}.
@@ -85,10 +85,10 @@ put_bucket(State, Bucket, ACL) ->
 delete_bucket(State, Bucket) ->
     do_bucket(delete, State, Bucket,undefined).
 
--spec get_bucket(state(),string()) -> {ok, #bucket{}}.
-%% @spec get_bucket(state(),string()) -> {ok, #buckt{}}
-%% @doc send GET BUCKET request
-get_bucket(State, Bucket) ->
+-spec get_bucket_xml(state(),string()) -> {ok, #bucket{}}.
+%% @spec get_bucket_xml(state(),string()) -> {ok, #bucket{}}
+%% @doc send GET BUCKET request(return raw xml string)
+get_bucket_xml(State, Bucket) ->
     do_bucket(get, State, Bucket, undefined).
 
 %%--- internal ---------------------------------------------
