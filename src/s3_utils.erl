@@ -35,7 +35,7 @@ xml_list_bucket(XML) ->
     {Top, []} = xmerl_scan:string(binary_to_list(XML)),
     ReturnL =
 	lists:foldl(fun list_bucket0/2,
-		    #list_bucket{},
+		    #list_bucket{contents=[]},
 		    Top#xmlElement.content),
     {ok, ReturnL}.
 
@@ -124,12 +124,7 @@ bucket0(_,Acc) ->
 
 
 list_bucket0(#xmlElement{name=Name,content=Cntnt}, Acc) ->
-    Value = case Cntnt of
-		[X] when is_record(X, xmlText) ->
-		    X#xmlText.value;
-		[] ->
-		    ""
-	    end,
+    Value = text_value(Cntnt),
     case Name of
 	'Name' ->
 	    Acc#list_bucket{name=Value};
@@ -142,7 +137,12 @@ list_bucket0(#xmlElement{name=Name,content=Cntnt}, Acc) ->
 	'IsTruncated' ->
 	    Acc#list_bucket{is_truncated=list_to_atom(Value)};
 	'Contents' ->
-	    lists:foldl(fun contents0/2, Acc, Cntnt);
+	    C0 = Acc#list_bucket.contents,
+	    Acc#list_bucket
+		{contents =
+		     [lists:foldl(fun contents0/2,
+				  #content{}, Cntnt)|
+		      C0]};
 	_ ->
 	     Acc
     end;
@@ -150,12 +150,7 @@ list_bucket0(_,Acc) ->
     Acc.
 
 contents0(#xmlElement{name=Name,content=Cntnt}, Acc) ->
-    Value = case Cntnt of
-		[X] when is_record(X, xmlText) ->
-		    X#xmlText.value;
-		[] ->
-		    ""
-	    end,
+    Value = text_value(Cntnt),
     case Name of
 	'Key' ->
 	    Acc#content{key=Value};
@@ -175,3 +170,13 @@ contents0(#xmlElement{name=Name,content=Cntnt}, Acc) ->
     end;
 contents0(_,Acc) ->
     Acc.
+
+text_value(Cntnt) ->
+    case Cntnt of
+	[X] when is_record(X, xmlText) ->
+	    X#xmlText.value;
+	[] ->
+	    "";
+	_ ->
+	    {error,not_text}
+    end.

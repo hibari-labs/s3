@@ -46,6 +46,7 @@ all_tests_(State,ServerType,Setup,Teardown) ->
       ?_test(test_002(State,ServerType)),
       ?_test(test_003(State,ServerType)),
       ?_test(test_004(State,ServerType)),
+      ?_test(test_005(State,ServerType)),
       ?_test(test_zzz(State,ServerType))
      ]
     }.
@@ -110,6 +111,7 @@ test_001(State,_) ->
     Key = "Key001",
     Value = "Value001",
     ValueBin = list_to_binary(Value),
+    %% ok = ?MUT:delete_object(State, Bucket, Key),
     ok = ?MUT:delete_bucket(State, Bucket),
     ok = ?MUT:put_bucket(State, Bucket, ACL),
     ok = ?MUT:put_object(State, Bucket, Key, Value,ACL),
@@ -158,13 +160,36 @@ test_004(undefined,_) ->
     ok;
 test_004(State,_) ->
     ACL = undefined,
-    Bucket = "bucket000",
+    Bucket = "bucket004",
     ok = ?MUT:delete_bucket(State, Bucket),
     ok = ?MUT:put_bucket(State, Bucket, ACL),
     {ok,LB} = ?MUT:get_bucket(State, Bucket),
 
     ?assertEqual(Bucket, LB#list_bucket.name),
 
+    ok = ?MUT:delete_bucket(State, Bucket),
+    ok.
+
+%% --- put, get and delete objects
+test_005(undefined,_) ->
+    ok;
+test_005(State,_) ->
+    ACL = undefined,
+    Bucket = "bucket005",
+    Key = "Key005",
+    Value = "Value005",
+    ValueBin = list_to_binary(Value),
+    %% ok = ?MUT:delete_object(State, Bucket, Key),
+    ok = ?MUT:delete_bucket(State, Bucket),
+    ok = ?MUT:put_bucket(State, Bucket, ACL),
+    ok = ?MUT:put_object(State, Bucket, Key, Value,ACL),
+    {ok,ValueBin} =
+	?MUT:get_object(State, Bucket, Key),
+    {ok,LB} = ?MUT:get_bucket(State, Bucket),
+
+    ?assertEqual(Bucket, LB#list_bucket.name),
+
+    ok = ?MUT:delete_object(State, Bucket, Key),
     ok = ?MUT:delete_bucket(State, Bucket),
     ok.
 
