@@ -45,6 +45,7 @@ all_tests_(State,ServerType,Setup,Teardown) ->
       ?_test(test_001(State,ServerType)),
       ?_test(test_002(State,ServerType)),
       ?_test(test_003(State,ServerType)),
+      ?_test(test_004(State,ServerType)),
       ?_test(test_zzz(State,ServerType))
      ]
     }.
@@ -150,6 +151,21 @@ test_003(State,_) ->
     ?assertEqual(Bucket,
 		 (hd(Buckets1--Buckets0))#bucket.name),
     ?assertEqual(Buckets0, Buckets2),
+    ok.
+
+%% --- get bucket
+test_004(undefined,_) ->
+    ok;
+test_004(State,_) ->
+    ACL = undefined,
+    Bucket = "bucket000",
+    ok = ?MUT:delete_bucket(State, Bucket),
+    ok = ?MUT:put_bucket(State, Bucket, ACL),
+    {ok,LB} = ?MUT:get_bucket(State, Bucket),
+
+    ?assertEqual(Bucket, LB#list_bucket.name),
+
+    ok = ?MUT:delete_bucket(State, Bucket),
     ok.
 
 test_zzz(_,_) ->

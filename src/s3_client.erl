@@ -10,6 +10,7 @@
 	 get_service/1,
 	 get_service_xml/1,
 	 get_object/3,
+	 get_bucket/2,
 	 get_bucket_xml/2
 	]).
 
@@ -85,7 +86,15 @@ put_bucket(State, Bucket, ACL) ->
 delete_bucket(State, Bucket) ->
     do_bucket(delete, State, Bucket,undefined).
 
--spec get_bucket_xml(state(),string()) -> {ok, #bucket{}}.
+-spec get_bucket(state(),string()) -> {ok,#list_bucket{}}.
+%% @spec get_bucket(state(),string())
+%%         -> {ok, #list_bucket{}}
+%% @doc send GET BUCKET request
+get_bucket(State, Bucket) ->
+    {ok, XML} = get_bucket_xml(State, Bucket),
+    s3_utils:xml_list_bucket(XML).
+
+-spec get_bucket_xml(state(),string()) -> {ok, binary()}.
 %% @spec get_bucket_xml(state(),string()) -> {ok, #bucket{}}
 %% @doc send GET BUCKET request(return raw xml string)
 get_bucket_xml(State, Bucket) ->

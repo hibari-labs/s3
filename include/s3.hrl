@@ -9,8 +9,26 @@
                             ?S3_VIRTUAL_HOSTED_STYLE}).
 
 
+%% --- XML ---
 -record(owner, {id           :: string(),
 		display_name :: string()}).
 
 -record(bucket, {name          :: string(),
 		 creation_date :: string()}).
+
+-record(content,
+	{key :: string(),
+	 last_modified :: string(),
+	 etag :: string(),
+	 size :: integer(),
+	 storage_class :: string(),
+	 owner :: #owner{}}).
+
+-record(list_bucket,
+	{name :: string(),
+	 prefix :: string(),
+	 marker :: string(),
+	 max_keys :: integer(),
+	 is_truncated :: boolean(),
+	 contents :: [#content{}]}).
+

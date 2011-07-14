@@ -1,5 +1,6 @@
 -module(s3_utils).
 -export([make_auth/5,
+	 xml_list_bucket/1,
 	 xml_service/1]).
 
 -include("s3.hrl").
@@ -22,6 +23,24 @@ make_auth(Op, KeyID, Key, Uri, H0) ->
               AmzHeaders,
               Resource, H0).
 
+xml_service(XML) ->
+    {Top, []} = xmerl_scan:string(binary_to_list(XML)),
+    ReturnL =
+	lists:foldl(fun service0/2,
+		    {#owner{}, []},
+		    Top#xmlElement.content),
+    {ok, ReturnL}.
+
+xml_list_bucket(XML) ->
+    {Top, []} = xmerl_scan:string(binary_to_list(XML)),
+    ReturnL =
+	lists:foldl(fun list_bucket0/2,
+		    #list_bucket{},
+		    Top#xmlElement.content),
+    {ok, ReturnL}.
+
+
+%% --- internal -------------------------------------------
 make_auth(KeyID, KeyData, Verb, ContentMD5, ContentType,
 	  Date, AmzHeaders, Resource, H0) ->
     StringToSign =
@@ -54,36 +73,29 @@ fix_resource(Uri) ->
 	    Path
     end.
     
-xml_service(XML) ->
-    {Top, []} = xmerl_scan:string(binary_to_list(XML)),
-    ReturnL =
-	lists:foldl(fun service0/2,
-		    {#owner{}, []},
-		    Top#xmlElement.content),
-    {ok, ReturnL}.
-
-service0(#xmlElement{name=Name,content=Cntnt}, Acc) ->
+service0(#xmlElement{name=Name,content=Cntnt},
+	 {Owner0,Buckets0} = Acc) ->
     case Name of
 	'Owner' ->
-	    lists:foldl(fun owner0/2, Acc, Cntnt);
+	    {lists:foldl(fun owner0/2, Owner0, Cntnt),
+	     Buckets0};
 	'Buckets' ->
-	    lists:foldl(fun buckets0/2, Acc, Cntnt);
+	    {Owner0,
+	     lists:foldl(fun buckets0/2, Buckets0, Cntnt)};
 	_ ->
 	     Acc
     end;
 service0(_,Acc) ->
     Acc.
 
-owner0(#xmlElement{name=Name,content=[Text]},
-       {Owner,Buckets}=Acc) ->
+owner0(#xmlElement{name=Name,content=[Text]}, Owner) ->
     case Name of
 	'ID' ->
-	    {Owner#owner{id=Text#xmlText.value}, Buckets};
+	    Owner#owner{id=Text#xmlText.value};
 	'DisplayName' ->
-	    {Owner#owner{display_name=Text#xmlText.value},
-	     Buckets};
+	    Owner#owner{display_name=Text#xmlText.value};
 	_ ->
-	     Acc
+	     Owner
     end;
 owner0(_,Acc) ->
     Acc.
@@ -98,18 +110,69 @@ buckets0(#xmlElement{name=Name,content=Cntnt}, Acc) ->
 buckets0(_,Acc) ->
     Acc.
 
-bucket0(#xmlElement{name=Name,content=[Text]},
-	{Owner,Buckets}=Acc) ->
+bucket0(#xmlElement{name=Name,content=[Text]}, Buckets) ->
     case Name of
 	'Name' ->
-	    {Owner,
-	     [#bucket{name=Text#xmlText.value}|Buckets]};
+	    [#bucket{name=Text#xmlText.value}|Buckets];
 	'CreationDate' ->
 	    [H|T] = Buckets,
-	    {Owner,
-	     [H#bucket{creation_date=Text#xmlText.value}|T]};
+	    [H#bucket{creation_date=Text#xmlText.value}|T];
+	_ ->
+	     Buckets
+    end;
+bucket0(_,Acc) ->
+    Acc.
+
+
+list_bucket0(#xmlElement{name=Name,content=Cntnt}, Acc) ->
+    Value = case Cntnt of
+		[X] when is_record(X, xmlText) ->
+		    X#xmlText.value;
+		[] ->
+		    ""
+	    end,
+    case Name of
+	'Name' ->
+	    Acc#list_bucket{name=Value};
+	'Prefix' ->
+	    Acc#list_bucket{prefix=Value};
+	'Marker' ->
+	    Acc#list_bucket{marker=Value};
+	'MaxKeys' ->
+	    Acc#list_bucket{max_keys=list_to_integer(Value)};
+	'IsTruncated' ->
+	    Acc#list_bucket{is_truncated=list_to_atom(Value)};
+	'Contents' ->
+	    lists:foldl(fun contents0/2, Acc, Cntnt);
 	_ ->
 	     Acc
     end;
-bucket0(_,Acc) ->
+list_bucket0(_,Acc) ->
+    Acc.
+
+contents0(#xmlElement{name=Name,content=Cntnt}, Acc) ->
+    Value = case Cntnt of
+		[X] when is_record(X, xmlText) ->
+		    X#xmlText.value;
+		[] ->
+		    ""
+	    end,
+    case Name of
+	'Key' ->
+	    Acc#content{key=Value};
+	'LastModified' ->
+	    Acc#content{last_modified=Value};
+	'ETag' ->
+	    Acc#content{etag=Value};
+	'Size' ->
+	    Acc#content{size=list_to_integer(Value)};
+	'StorageClass' ->
+	    Acc#content{storage_class=Value};
+	'Owner' ->
+	    Acc#content{
+	      owner=lists:foldl(fun owner0/2, Acc, Cntnt)};
+	_ ->
+	     Acc
+    end;
+contents0(_,Acc) ->
     Acc.
