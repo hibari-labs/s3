@@ -100,7 +100,8 @@ test_000(State,_) ->
     cleanup(State, Bucket),
 
     ?assertEqual(ok, ?MUT:put_bucket(State, Bucket, ACL)),
-    {ok,_XML} = ?MUT:get_bucket_xml(State, Bucket),
+    ?assertMatch({ok,_XML},
+		 ?MUT:get_bucket_xml(State, Bucket)),
     io:format(":::::::::::::~n"),
     ?assertEqual(ok, ?MUT:delete_bucket(State, Bucket)),
     io:format(":::::::::::::~n"),
@@ -119,10 +120,12 @@ test_001(State,ServerType) ->
     cleanup(State,Bucket,Key,ServerType),
 
     ?assertEqual(ok, ?MUT:put_bucket(State, Bucket, ACL)),
-    ?assertEqual(ok, ?MUT:put_object(State, Bucket, Key, Value,ACL)),
-    {ok,ValueBin} =
-	?MUT:get_object(State, Bucket, Key),
-    {ok,_XML} = ?MUT:get_bucket_xml(State, Bucket),
+    ?assertEqual(ok,
+		 ?MUT:put_object(State,Bucket,Key,Value,ACL)),
+    ?assertMatch({ok,ValueBin},
+		 ?MUT:get_object(State, Bucket, Key)),
+    ?assertMatch({ok,_XML},
+		 ?MUT:get_bucket_xml(State, Bucket)),
     ?assertEqual(ok, ?MUT:delete_object(State, Bucket, Key)),
     ?assertEqual(ok, ?MUT:delete_bucket(State, Bucket)),
     ok.
@@ -139,9 +142,7 @@ test_002(State,_) ->
     {ok,XML0} = ?MUT:get_service_xml(State),
     ?assertEqual(ok, ?MUT:put_bucket(State, Bucket, ACL)),
     ?assertEqual(ok, ?MUT:delete_bucket(State, Bucket)),
-    {ok,XML2} = ?MUT:get_service_xml(State),
-
-    ?assertEqual(XML0, XML2),
+    ?assertMatch({ok,XML0}, ?MUT:get_service_xml(State)),
     ok.
 
 %% --- get service
@@ -157,11 +158,10 @@ test_003(State,_) ->
     ?assertEqual(ok, ?MUT:put_bucket(State, Bucket, ACL)),
     {ok,{_,Buckets1}} = ?MUT:get_service(State),
     ?assertEqual(ok, ?MUT:delete_bucket(State, Bucket)),
-    {ok,{_,Buckets2}} = ?MUT:get_service(State),
+    ?assertMatch({ok,{_,Buckets0}}, ?MUT:get_service(State)),
 
     ?assertEqual(Bucket,
 		 (hd(Buckets1--Buckets0))#bucket.name),
-    ?assertEqual(Buckets0, Buckets2),
     ok.
 
 %% --- get bucket
@@ -174,10 +174,8 @@ test_004(State,_) ->
     cleanup(State, Bucket),
 
     ?assertEqual(ok, ?MUT:put_bucket(State, Bucket, ACL)),
-    {ok,LB} = ?MUT:get_bucket(State, Bucket),
-
-    ?assertEqual(Bucket, LB#list_bucket.name),
-
+    ?assertMatch({ok,#list_bucket{name=Bucket}},
+		 ?MUT:get_bucket(State, Bucket)),
     ?assertEqual(ok, ?MUT:delete_bucket(State, Bucket)),
     ok.
 
@@ -194,13 +192,12 @@ test_005(State,ServerType) ->
     cleanup(State,Bucket,Key,ServerType),
 
     ?assertEqual(ok, ?MUT:put_bucket(State, Bucket, ACL)),
-    ?assertEqual(ok, ?MUT:put_object(State, Bucket, Key, Value,ACL)),
-    {ok,ValueBin} =
-	?MUT:get_object(State, Bucket, Key),
-    {ok,LB} = ?MUT:get_bucket(State, Bucket),
-
-    ?assertEqual(Bucket, LB#list_bucket.name),
-
+    ?assertEqual(ok,
+		 ?MUT:put_object(State,Bucket,Key,Value,ACL)),
+    ?assertMatch({ok,ValueBin},
+		 ?MUT:get_object(State, Bucket, Key)),
+    ?assertMatch({ok,#list_bucket{name=Bucket}},
+		 ?MUT:get_bucket(State, Bucket)),
     ?assertEqual(ok, ?MUT:delete_object(State, Bucket, Key)),
     ?assertEqual(ok, ?MUT:delete_bucket(State, Bucket)),
     ok.
