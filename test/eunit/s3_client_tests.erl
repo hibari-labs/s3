@@ -96,30 +96,35 @@ test_000(undefined,_) ->
 test_000(State,_) ->
     ACL = undefined,
     Bucket = "bucket000",
-    ok = ?MUT:delete_bucket(State, Bucket),
+
+    cleanup(State, Bucket),
+
     ok = ?MUT:put_bucket(State, Bucket, ACL),
     {ok,_XML} = ?MUT:get_bucket_xml(State, Bucket),
+    io:format(":::::::::::::~n"),
     ok = ?MUT:delete_bucket(State, Bucket),
+    io:format(":::::::::::::~n"),
     ok.
 
 %% --- put, get and delete objects
 test_001(undefined,_) ->
     ok;
-test_001(State,_) ->
+test_001(State,ServerType) ->
     ACL = undefined,
     Bucket = "bucket001",
     Key = "Key001",
     Value = "Value001",
     ValueBin = list_to_binary(Value),
-    %% ok = ?MUT:delete_object(State, Bucket, Key),
-    ok = ?MUT:delete_bucket(State, Bucket),
-    ok = ?MUT:put_bucket(State, Bucket, ACL),
-    ok = ?MUT:put_object(State, Bucket, Key, Value,ACL),
+    
+    cleanup(State,Bucket,Key,ServerType),
+
+    ?assertEqual(ok, ?MUT:put_bucket(State, Bucket, ACL)),
+    ?assertEqual(ok, ?MUT:put_object(State, Bucket, Key, Value,ACL)),
     {ok,ValueBin} =
 	?MUT:get_object(State, Bucket, Key),
     {ok,_XML} = ?MUT:get_bucket_xml(State, Bucket),
-    ok = ?MUT:delete_object(State, Bucket, Key),
-    ok = ?MUT:delete_bucket(State, Bucket),
+    ?assertEqual(ok, ?MUT:delete_object(State, Bucket, Key)),
+    ?assertEqual(ok, ?MUT:delete_bucket(State, Bucket)),
     ok.
 
 %% --- get service xml
@@ -128,7 +133,9 @@ test_002(undefined,_) ->
 test_002(State,_) ->
     ACL = undefined,
     Bucket = "bucket002",
-    ok = ?MUT:delete_bucket(State, Bucket),
+
+    cleanup(State, Bucket),
+
     {ok,XML0} = ?MUT:get_service_xml(State),
     ok = ?MUT:put_bucket(State, Bucket, ACL),
     ok = ?MUT:delete_bucket(State, Bucket),
@@ -143,7 +150,9 @@ test_003(undefined,_) ->
 test_003(State,_) ->
     ACL = undefined,
     Bucket = "bucket002",
-    ok = ?MUT:delete_bucket(State, Bucket),
+
+    cleanup(State, Bucket),
+
     {ok,{_,Buckets0}} = ?MUT:get_service(State),
     ok = ?MUT:put_bucket(State, Bucket, ACL),
     {ok,{_,Buckets1}} = ?MUT:get_service(State),
@@ -161,7 +170,9 @@ test_004(undefined,_) ->
 test_004(State,_) ->
     ACL = undefined,
     Bucket = "bucket004",
-    ok = ?MUT:delete_bucket(State, Bucket),
+
+    cleanup(State, Bucket),
+
     ok = ?MUT:put_bucket(State, Bucket, ACL),
     {ok,LB} = ?MUT:get_bucket(State, Bucket),
 
@@ -173,14 +184,15 @@ test_004(State,_) ->
 %% --- put, get and delete objects
 test_005(undefined,_) ->
     ok;
-test_005(State,_) ->
+test_005(State,ServerType) ->
     ACL = undefined,
     Bucket = "bucket005",
     Key = "Key005",
     Value = "Value005",
     ValueBin = list_to_binary(Value),
-    %% ok = ?MUT:delete_object(State, Bucket, Key),
-    ok = ?MUT:delete_bucket(State, Bucket),
+
+    cleanup(State,Bucket,Key,ServerType),
+
     ok = ?MUT:put_bucket(State, Bucket, ACL),
     ok = ?MUT:put_object(State, Bucket, Key, Value,ACL),
     {ok,ValueBin} =
@@ -211,3 +223,36 @@ add_user(Name) ->
     {?FIELD_KEY,Key}=lists:keyfind(?FIELD_KEY,1,HDR),
 					  
     {ok, KeyId, Key}.
+
+
+cleanup(State,Bucket) ->
+    Ret =
+	case ?MUT:delete_bucket(State, Bucket) of
+	    ok -> ok;
+	    key_not_exist -> ok;
+	    Err -> Err
+	end,
+    ?assertEqual(ok, Ret).
+
+cleanup(State,Bucket,Key,ServerType) ->
+    RetObj =
+	case ?MUT:delete_object(State, Bucket, Key) of
+	    X when X==ok orelse X==key_not_exist ->
+		ok;
+	    {ok,_} = Err ->
+		if ServerType==hibari ->
+			%% workaround for hibari 500 error
+			ok;
+		   true ->
+			{delete_object_error, Err}
+		end;
+	    Err ->
+		{delete_object_error, Err}
+	end,
+    RetBucket =
+	case ?MUT:delete_bucket(State, Bucket) of
+	    ok -> ok;
+	    key_not_exist -> ok;
+	    Err2 -> {delete_bucket_error, Err2}
+	end,
+    ?assertEqual({ok,ok}, {RetObj, RetBucket}).
