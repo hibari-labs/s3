@@ -13,7 +13,6 @@
 	 get_bucket/2
 	]).
 
--type error() :: any(). %% todo
 -type state() :: #state{}.
 
 %% --- external API ----------------------------------------
@@ -51,25 +50,22 @@ get_service_xml(State) ->
 
 %% === OBJECT ================
 -spec put_object(state(),string(),string(),binary(),term())
-		-> ok|error().
+		-> ok.
 %% @spec put_object(state(),string(),string(),binary(),term())
-%%        ->	ok|error()
+%%        ->	ok
 %% @doc  send PUT OBJECT request
 put_object(State, Bucket, Key, Val, ACL) ->
     do_object(put, State, Bucket, Key, Val, ACL).
 
--spec delete_object(state(),string(),string())
-		   -> ok|error().
-%% @spec delete_object(state(),string(),string())
-%%        ->	ok|error()
+-spec delete_object(state(),string(),string()) -> ok.
+%% @spec delete_object(state(),string(),string()) -> ok
 %% @doc send DELETE OBJECT request
 delete_object(State, Bucket, Key) ->
     do_object(delete,State,Bucket,Key,undefined,undefined).
 
--spec get_object(state(),string(),string())
-		-> ok|error().
+-spec get_object(state(),string(),string()) -> {ok, binary()}.
 %% @spec get_object(state(),string(),string())
-%%        ->	ok|error()
+%%        ->	{ok, binary()}
 %% @doc send GET OBJECT request
 get_object(State, Bucket, Key) ->
     do_object(get, State, Bucket, Key, undefined, undefined).
@@ -77,26 +73,20 @@ get_object(State, Bucket, Key) ->
 
 
 %% === BUKCET ================
--spec put_bucket(state(),string(),term())
-		-> ok|error().
-%% @spec put_object(state(),string(),term())
-%%        ->	ok|error()
+-spec put_bucket(state(),string(),term()) -> ok.
+%% @spec put_object(state(),string(),term()) -> ok
 %% @doc  send PUT BUCKET request
 put_bucket(State, Bucket, ACL) ->
     do_bucket(put, State, Bucket, ACL).
 
--spec delete_bucket(state(),string())
-		   -> ok|error().
-%% @spec delete_bucket(state(),string())
-%%        ->	ok|error()
+-spec delete_bucket(state(),string()) -> ok.
+%% @spec delete_bucket(state(),string()) -> ok
 %% @doc send DELETE BUCKET request
 delete_bucket(State, Bucket) ->
     do_bucket(delete, State, Bucket,undefined).
 
--spec get_bucket(state(),string())
-		-> ok|error().
-%% @spec get_bucket(state(),string())
-%%        ->	ok|error()
+-spec get_bucket(state(),string()) -> {ok, #bucket{}}.
+%% @spec get_bucket(state(),string()) -> {ok, #buckt{}}
 %% @doc send GET BUCKET request
 get_bucket(State, Bucket) ->
     do_bucket(get, State, Bucket, undefined).
