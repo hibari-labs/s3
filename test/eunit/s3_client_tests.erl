@@ -99,12 +99,12 @@ test_000(State,_) ->
 
     cleanup(State, Bucket),
 
-    ?assertEqual(ok, ?MUT:put_bucket(State, Bucket, ACL)),
+    ?assertEqual(ok,
+		 ?MUT:put_bucket(State, Bucket, ACL)),
     ?assertMatch({ok,_XML},
 		 ?MUT:get_bucket_xml(State, Bucket)),
-    io:format(":::::::::::::~n"),
-    ?assertEqual(ok, ?MUT:delete_bucket(State, Bucket)),
-    io:format(":::::::::::::~n"),
+    ?assertEqual(ok,
+		 ?MUT:delete_bucket(State, Bucket)),
     ok.
 
 %% --- put, get and delete objects
@@ -119,15 +119,18 @@ test_001(State,ServerType) ->
     
     cleanup(State,Bucket,Key,ServerType),
 
-    ?assertEqual(ok, ?MUT:put_bucket(State, Bucket, ACL)),
+    ?assertEqual(ok,
+		 ?MUT:put_bucket(State, Bucket, ACL)),
     ?assertEqual(ok,
 		 ?MUT:put_object(State,Bucket,Key,Value,ACL)),
     ?assertMatch({ok,ValueBin},
 		 ?MUT:get_object(State, Bucket, Key)),
     ?assertMatch({ok,_XML},
 		 ?MUT:get_bucket_xml(State, Bucket)),
-    ?assertEqual(ok, ?MUT:delete_object(State, Bucket, Key)),
-    ?assertEqual(ok, ?MUT:delete_bucket(State, Bucket)),
+    ?assertEqual(ok,
+		 ?MUT:delete_object(State, Bucket, Key)),
+    ?assertEqual(ok,
+		 ?MUT:delete_bucket(State, Bucket)),
     ok.
 
 %% --- get service xml
@@ -140,9 +143,12 @@ test_002(State,_) ->
     cleanup(State, Bucket),
 
     {ok,XML0} = ?MUT:get_service_xml(State),
-    ?assertEqual(ok, ?MUT:put_bucket(State, Bucket, ACL)),
-    ?assertEqual(ok, ?MUT:delete_bucket(State, Bucket)),
-    ?assertMatch({ok,XML0}, ?MUT:get_service_xml(State)),
+    ?assertEqual(ok,
+		 ?MUT:put_bucket(State, Bucket, ACL)),
+    ?assertEqual(ok,
+		 ?MUT:delete_bucket(State, Bucket)),
+    ?assertMatch({ok,XML0},
+		 ?MUT:get_service_xml(State)),
     ok.
 
 %% --- get service
@@ -155,11 +161,13 @@ test_003(State,_) ->
     cleanup(State, Bucket),
 
     {ok,{_,Buckets0}} = ?MUT:get_service(State),
-    ?assertEqual(ok, ?MUT:put_bucket(State, Bucket, ACL)),
+    ?assertEqual(ok,
+		 ?MUT:put_bucket(State, Bucket, ACL)),
     {ok,{_,Buckets1}} = ?MUT:get_service(State),
-    ?assertEqual(ok, ?MUT:delete_bucket(State, Bucket)),
-    ?assertMatch({ok,{_,Buckets0}}, ?MUT:get_service(State)),
-
+    ?assertEqual(ok,
+		 ?MUT:delete_bucket(State, Bucket)),
+    ?assertMatch({ok,{_,Buckets0}},
+		 ?MUT:get_service(State)),
     ?assertEqual(Bucket,
 		 (hd(Buckets1--Buckets0))#bucket.name),
     ok.
@@ -173,10 +181,12 @@ test_004(State,_) ->
 
     cleanup(State, Bucket),
 
-    ?assertEqual(ok, ?MUT:put_bucket(State, Bucket, ACL)),
+    ?assertEqual(ok,
+		 ?MUT:put_bucket(State, Bucket, ACL)),
     ?assertMatch({ok,#list_bucket{name=Bucket}},
 		 ?MUT:get_bucket(State, Bucket)),
-    ?assertEqual(ok, ?MUT:delete_bucket(State, Bucket)),
+    ?assertEqual(ok,
+		 ?MUT:delete_bucket(State, Bucket)),
     ok.
 
 %% --- put, get and delete objects
@@ -191,15 +201,18 @@ test_005(State,ServerType) ->
 
     cleanup(State,Bucket,Key,ServerType),
 
-    ?assertEqual(ok, ?MUT:put_bucket(State, Bucket, ACL)),
+    ?assertEqual(ok,
+		 ?MUT:put_bucket(State, Bucket, ACL)),
     ?assertEqual(ok,
 		 ?MUT:put_object(State,Bucket,Key,Value,ACL)),
     ?assertMatch({ok,ValueBin},
 		 ?MUT:get_object(State, Bucket, Key)),
     ?assertMatch({ok,#list_bucket{name=Bucket}},
 		 ?MUT:get_bucket(State, Bucket)),
-    ?assertEqual(ok, ?MUT:delete_object(State, Bucket, Key)),
-    ?assertEqual(ok, ?MUT:delete_bucket(State, Bucket)),
+    ?assertEqual(ok,
+		 ?MUT:delete_object(State, Bucket, Key)),
+    ?assertEqual(ok,
+		 ?MUT:delete_bucket(State, Bucket)),
     ok.
 
 test_zzz(_,_) ->
@@ -238,7 +251,7 @@ cleanup(State,Bucket,Key,ServerType) ->
 		ok;
 	    {ok,_} = Err ->
 		if ServerType==hibari ->
-			%% workaround for hibari 500 error
+			%% workaround hibari 500 error
 			ok;
 		   true ->
 			{delete_object_error, Err}
