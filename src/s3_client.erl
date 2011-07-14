@@ -28,13 +28,16 @@ make_state(Host, Port, Id, AuthKey, Style) ->
 
 
 %% === SERVICE================
--spec get_service(state()) -> ok|error().
-%% @spec get_object(state()) -> ok|error()
+-spec get_service(state()) -> {ok, {#owner{}, [#bucket{}]}}.
+%% @spec get_service(state()) -> {ok, {#owner{}, [#bucket{}]}}
 %% @doc send GET SERVICE request
 get_service(State) ->
     {ok,XML} = get_service_xml(State),
     s3_utils:xml_service(XML).
 
+-spec get_service_xml(state()) -> {ok, binary()}.
+%% @spec get_service_xml(state()) -> {ok, string()}
+%% @doc send GET SERVICE request(return raw xml string)
 get_service_xml(State) ->
     Op = get,
     Host = State#state.host,
