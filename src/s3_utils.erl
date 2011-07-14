@@ -169,7 +169,7 @@ contents0(#xmlElement{name=Name,content=Cntnt}, Acc) ->
 	    Acc#content{storage_class=Value};
 	'Owner' ->
 	    Acc#content{
-	      owner=lists:foldl(fun owner0/2, Acc, Cntnt)};
+	      owner=lists:foldl(fun owner0/2, #owner{}, Cntnt)};
 	_ ->
 	     Acc
     end;
