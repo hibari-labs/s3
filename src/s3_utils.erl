@@ -2,6 +2,7 @@
 -export([make_auth/5,
 	 xml_service/1]).
 
+-include("s3.hrl").
 -include_lib("xmerl/include/xmerl.hrl").
 
 make_auth(Op, KeyID, Key, Uri, H0) ->
@@ -56,17 +57,59 @@ fix_resource(Uri) ->
 xml_service(XML) ->
     {Top, []} = xmerl_scan:string(binary_to_list(XML)),
     ReturnL =
-	lists:foldl(fun service0/2, [], Top#xmlElement.content),
+	lists:foldl(fun service0/2,
+		    {#owner{}, []},
+		    Top#xmlElement.content),
     {ok, ReturnL}.
 
 service0(#xmlElement{name=Name,content=Cntnt}, Acc) ->
     case Name of
 	'Owner' ->
-	    [Cntnt|Acc];
+	    lists:foldl(fun owner0/2, Acc, Cntnt);
 	'Buckets' ->
-	    [Cntnt|Acc];
+	    lists:foldl(fun buckets0/2, Acc, Cntnt);
 	_ ->
 	     Acc
     end;
 service0(_,Acc) ->
+    Acc.
+
+owner0(#xmlElement{name=Name,content=[Text]},
+       {Owner,Buckets}=Acc) ->
+    case Name of
+	'ID' ->
+	    {Owner#owner{id=Text#xmlText.value}, Buckets};
+	'DisplayName' ->
+	    {Owner#owner{display_name=Text#xmlText.value},
+	     Buckets};
+	_ ->
+	     Acc
+    end;
+owner0(_,Acc) ->
+    Acc.
+
+buckets0(#xmlElement{name=Name,content=Cntnt}, Acc) ->
+    case Name of
+	'Bucket' ->
+	    lists:foldl(fun bucket0/2, Acc, Cntnt);
+	_ ->
+	     Acc
+    end;
+buckets0(_,Acc) ->
+    Acc.
+
+bucket0(#xmlElement{name=Name,content=[Text]},
+	{Owner,Buckets}=Acc) ->
+    case Name of
+	'Name' ->
+	    {Owner,
+	     [#bucket{name=Text#xmlText.value}|Buckets]};
+	'CreationDate' ->
+	    [H|T] = Buckets,
+	    {Owner,
+	     [H#bucket{creation_date=Text#xmlText.value}|T]};
+	_ ->
+	     Acc
+    end;
+bucket0(_,Acc) ->
     Acc.

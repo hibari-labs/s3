@@ -44,6 +44,7 @@ all_tests_(State,ServerType,Setup,Teardown) ->
       ?_test(test_000(State,ServerType)),
       ?_test(test_001(State,ServerType)),
       ?_test(test_002(State,ServerType)),
+      ?_test(test_003(State,ServerType)),
       ?_test(test_zzz(State,ServerType))
      ]
     }.
@@ -118,7 +119,7 @@ test_001(State,_) ->
     ok = ?MUT:delete_bucket(State, Bucket),
     ok.
 
-%% --- get service
+%% --- get service xml
 test_002(undefined,_) ->
     ok;
 test_002(State,_) ->
@@ -126,7 +127,19 @@ test_002(State,_) ->
     Bucket = "bucket002",
     ok = ?MUT:delete_bucket(State, Bucket),
     ok = ?MUT:put_bucket(State, Bucket, ACL),
-    {ok,_XML} = ?MUT:get_service(State),
+    {ok,_XML} = ?MUT:get_service_xml(State),
+    ok = ?MUT:delete_bucket(State, Bucket),
+    ok.
+
+%% --- get service
+test_003(undefined,_) ->
+    ok;
+test_003(State,_) ->
+    ACL = undefined,
+    Bucket = "bucket002",
+    ok = ?MUT:delete_bucket(State, Bucket),
+    ok = ?MUT:put_bucket(State, Bucket, ACL),
+    {ok,{_Owner,_Buckets}} = ?MUT:get_service(State),
     ok = ?MUT:delete_bucket(State, Bucket),
     ok.
 

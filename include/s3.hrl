@@ -12,5 +12,5 @@
 -record(owner, {id           :: string(),
 		display_name :: string()}).
 
--record(bucket, {name        :: string(),
-		 create_date :: string()}).
+-record(bucket, {name          :: string(),
+		 creation_date :: string()}).

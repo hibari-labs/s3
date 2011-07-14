@@ -8,6 +8,7 @@
 	 delete_bucket/2,
 	 delete_object/3,
 	 get_service/1,
+	 get_service_xml/1,
 	 get_object/3,
 	 get_bucket/2
 	]).
@@ -31,15 +32,17 @@ make_state(Host, Port, Id, AuthKey, Style) ->
 %% @spec get_object(state()) -> ok|error()
 %% @doc send GET SERVICE request
 get_service(State) ->
+    {ok,XML} = get_service_xml(State),
+    s3_utils:xml_service(XML).
+
+get_service_xml(State) ->
     Op = get,
     Host = State#state.host,
     Path = "/",
     AuthPath = "/",
     Val = "",
     ACL = undefined,
-    {ok,XML} =
-	do_req(Op, State, Host, Path, AuthPath, Val, ACL),
-    s3_utils:xml_service(XML).
+    do_req(Op, State, Host, Path, AuthPath, Val, ACL).
 
 
 
