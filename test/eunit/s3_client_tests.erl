@@ -126,9 +126,12 @@ test_002(State,_) ->
     ACL = undefined,
     Bucket = "bucket002",
     ok = ?MUT:delete_bucket(State, Bucket),
+    {ok,XML0} = ?MUT:get_service_xml(State),
     ok = ?MUT:put_bucket(State, Bucket, ACL),
-    {ok,_XML} = ?MUT:get_service_xml(State),
     ok = ?MUT:delete_bucket(State, Bucket),
+    {ok,XML2} = ?MUT:get_service_xml(State),
+
+    ?assertEqual(XML0, XML2),
     ok.
 
 %% --- get service
@@ -138,9 +141,15 @@ test_003(State,_) ->
     ACL = undefined,
     Bucket = "bucket002",
     ok = ?MUT:delete_bucket(State, Bucket),
+    {ok,{_,Buckets0}} = ?MUT:get_service(State),
     ok = ?MUT:put_bucket(State, Bucket, ACL),
-    {ok,{_Owner,_Buckets}} = ?MUT:get_service(State),
+    {ok,{_,Buckets1}} = ?MUT:get_service(State),
     ok = ?MUT:delete_bucket(State, Bucket),
+    {ok,{_,Buckets2}} = ?MUT:get_service(State),
+
+    ?assertEqual(Bucket,
+		 (hd(Buckets1--Buckets0))#bucket.name),
+    ?assertEqual(Buckets0, Buckets2),
     ok.
 
 test_zzz(_,_) ->
