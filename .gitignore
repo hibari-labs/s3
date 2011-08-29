@@ -1,3 +1,4 @@
+*.app
 *.beam
 *.boot
 *.huc
@@ -5,6 +6,5 @@
 *.script
 .eunit/
 erl_crash.dump
-*~
 root
 doc
