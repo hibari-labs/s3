@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% Copyright (c) 2007-2011 Gemini Mobile Technologies, Inc.  All rights reserved.
+%%% Copyright (c) 2007-2013 Hibari developers.  All rights reserved.
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
 %%% you may not use this file except in compliance with the License.
@@ -17,30 +17,30 @@
 -include("s3.hrl").
 
 -export([
-	 make_state/5,
-	 head_object/3,
-	 put_object/5,
-	 put_bucket/3,
-	 delete_bucket/2,
-	 delete_object/3,
-	 get_service/1,
-	 get_service_xml/1,
-	 get_object/3,
-	 get_bucket/2,
-	 get_bucket_xml/2
-	]).
+         make_state/5,
+         head_object/3,
+         put_object/5,
+         put_bucket/3,
+         delete_bucket/2,
+         delete_object/3,
+         get_service/1,
+         get_service_xml/1,
+         get_object/3,
+         get_bucket/2,
+         get_bucket_xml/2
+        ]).
 
 -type state() :: #state{}.
 
 %% --- external API ----------------------------------------
 -spec make_state(string(), integer(), string(), string(),
-		 atom()) -> state().
+                 atom()) -> state().
 %% @spec make_state(string(),integer(),string(),string(),
 %%              atom()) -> state()
 %% @doc  make "state" record
 make_state(Host, Port, Id, AuthKey, Style) ->
     #state{host=Host, port=Port, id=Id, auth_key=AuthKey,
-	   style=Style}.
+           style=Style}.
 
 
 %% === SERVICE================
@@ -67,9 +67,9 @@ get_service_xml(State) ->
 
 %% === OBJECT ================
 -spec put_object(state(),string(),string(),binary(),term())
-		-> ok.
+                -> ok.
 %% @spec put_object(state(),string(),string(),binary(),term())
-%%        ->	ok
+%%        ->    ok
 %% @doc  send PUT OBJECT request
 put_object(State, Bucket, Key, Val, ACL) ->
     do_object(put, State, Bucket, Key, Val, ACL).
@@ -82,15 +82,15 @@ delete_object(State, Bucket, Key) ->
 
 -spec get_object(state(),string(),string()) -> {ok, binary()}.
 %% @spec get_object(state(),string(),string())
-%%        ->	{ok, binary()}
+%%        ->    {ok, binary()}
 %% @doc send GET OBJECT request
 get_object(State, Bucket, Key) ->
     do_object(get, State, Bucket, Key, undefined, undefined).
 
 -spec head_object(state(),string(),string())
-		 -> {ok, binary()}.
+                 -> {ok, binary()}.
 %% @spec head_object(state(),string(),string())
-%%        ->	{ok, binary()}
+%%        ->    {ok, binary()}
 %% @doc send HEAD OBJECT request
 head_object(State, Bucket, Key) ->
     do_object(head, State, Bucket, Key, undefined, undefined).
@@ -126,52 +126,53 @@ get_bucket_xml(State, Bucket) ->
 %%--- internal ---------------------------------------------
 do_object(Op, State, Bucket, Key, Val, _ACL) ->
     #state{host=Host0, style=Style} = State,
-    {Host, Path, AuthPath} = 
-	case Style of
-	    ?S3_PATH_STYLE ->
-		{Host0, "/"++Bucket++"/"++Key,
-		 "/"++Bucket++"/"++Key};
-	    ?S3_VIRTUAL_HOSTED_STYLE ->
-		{Bucket++"."++Host0, "/"++Key,
-		 "/"++Bucket++"/"++Key}
-	end,
+    {Host, Path, AuthPath} =
+        case Style of
+            ?S3_PATH_STYLE ->
+                {Host0, "/"++Bucket++"/"++Key,
+                 "/"++Bucket++"/"++Key};
+            ?S3_VIRTUAL_HOSTED_STYLE ->
+                {Bucket++"."++Host0, "/"++Key,
+                 "/"++Bucket++"/"++Key}
+        end,
     do_req(Op, State, Host, Path, AuthPath, Val, _ACL).
 
 do_bucket(Op, State, Bucket, _ACL) ->
     #state{host=Host0, style=Style} = State,
-    {Host, Path, AuthPath} = 
-	case Style of
-	    ?S3_PATH_STYLE ->
-		{Host0, "/"++Bucket, "/"++Bucket};
-	    ?S3_VIRTUAL_HOSTED_STYLE ->
-		{Bucket++"."++Host0, "/",
-		 "/"++Bucket++"/"}
-	end,
+    {Host, Path, AuthPath} =
+        case Style of
+            ?S3_PATH_STYLE ->
+                {Host0, "/"++Bucket, "/"++Bucket};
+            ?S3_VIRTUAL_HOSTED_STYLE ->
+                {Bucket++"."++Host0, "/",
+                 "/"++Bucket++"/"}
+        end,
     Val = "",
     do_req(Op, State, Host, Path, AuthPath, Val, _ACL).
 
 do_req(Op, State, Host, Path, AuthPath, Val, _ACL) ->
     #state{port=Port,
-	   id=Id, auth_key=AuthKey} = State,
+           id=Id, auth_key=AuthKey} = State,
     Date = httpd_util:rfc1123_date(),
-    Header0 = [{"Host",Host},{"Connection","close"},
-	       {"Content-type", "text/plain"},
-	       {"Date",Date}],
+    Header0 = [{"Host",Host},
+               {"Connection","close"},
+               {"Content-type","text/plain"},
+               {"Date",Date}],
     Header =
-	s3_utils:make_auth(Op,Id,AuthKey,AuthPath,Header0),
+        s3_utils:make_auth(Op,Id,AuthKey,AuthPath,Header0),
     URL = "http://"++Host++":"++integer_to_list(Port)++Path,
     do_client(Op, URL, Header, "text/plain", Val).
 
 do_client(Op, URL, Header, CType, Body) ->
     Req = case Op of
-	      put ->
-		  {URL, Header, CType, Body};
-	      _ ->
-		  {URL, Header}
-	  end,
-		      
+              put ->
+                  {URL, Header, CType, Body};
+              _ ->
+                  {URL, Header}
+          end,
+
     Resp = httpc:request(Op, Req, [],
-			 [{body_format, binary}]),
+                         [{body_format, binary}]),
     fix_resp(Op, Resp).
 
 
@@ -188,5 +189,5 @@ fix_resp(_, {ok,{{_,200,_},_,_}}) ->
     ok;
 fix_resp(_, Err) ->
     Err.
-    
-    
+
+

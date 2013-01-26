@@ -1,5 +1,5 @@
 %%%---------------------------------------------------------
-%%% Copyright (c) 2008-2011 Gemini Mobile Technologies, Inc.  All rights reserved.
+%%% Copyright (c) 2008-2013 Hibari developers.  All rights reserved.
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
 %%% you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -define(MUT, s3_client). % Module Under Test (a.k.a. DUT)
--define(ATM, ?MODULE). % Automatic Test Module (a.k.a. ATE)
+-define(ATM, ?MODULE). % Automatic Test Module (a.k.a. ATM)
 
 -define(FIELD_KEY, "x-amz-key").
 -define(FIELD_KEYID, "x-amz-key-id").
@@ -33,8 +33,8 @@ all_tests_test_() ->
     application:start(inets),
     {State, ServerType} = server_info(),
     all_tests_(State, ServerType,
-	       fun test_setup/0,
-	       fun test_teardown/1).
+               fun test_setup/0,
+               fun test_teardown/1).
 
 all_tests_(State,ServerType,Setup,Teardown) ->
     {setup,
@@ -61,9 +61,9 @@ test_teardown(_) ->
 server_info() ->
     Env = os:getenv("S3_TEST_SERVER"),
     if Env==false ->
-	    {undefined, undefiend};
+            {undefined, undefiend};
        true ->
-	    server_info0(string:tokens(Env, ":"))
+            server_info0(string:tokens(Env, ":"))
     end.
 
 server_info0(["hibari"|_]) ->
@@ -101,11 +101,11 @@ test_000(State,_) ->
     cleanup(State, Bucket),
 
     ?assertEqual(ok,
-		 ?MUT:put_bucket(State, Bucket, ACL)),
+                 ?MUT:put_bucket(State, Bucket, ACL)),
     ?assertMatch({ok,_XML},
-		 ?MUT:get_bucket_xml(State, Bucket)),
+                 ?MUT:get_bucket_xml(State, Bucket)),
     ?assertEqual(ok,
-		 ?MUT:delete_bucket(State, Bucket)),
+                 ?MUT:delete_bucket(State, Bucket)),
     ok.
 
 %% --- put, get and delete objects
@@ -117,21 +117,21 @@ test_001(State,ServerType) ->
     Key = "Key001",
     Value = "Value001",
     ValueBin = list_to_binary(Value),
-    
+
     cleanup(State,Bucket,Key,ServerType),
 
     ?assertEqual(ok,
-		 ?MUT:put_bucket(State, Bucket, ACL)),
+                 ?MUT:put_bucket(State, Bucket, ACL)),
     ?assertEqual(ok,
-		 ?MUT:put_object(State,Bucket,Key,Value,ACL)),
+                 ?MUT:put_object(State,Bucket,Key,Value,ACL)),
     ?assertMatch({ok,ValueBin},
-		 ?MUT:get_object(State, Bucket, Key)),
+                 ?MUT:get_object(State, Bucket, Key)),
     ?assertMatch({ok,_XML},
-		 ?MUT:get_bucket_xml(State, Bucket)),
+                 ?MUT:get_bucket_xml(State, Bucket)),
     ?assertEqual(ok,
-		 ?MUT:delete_object(State, Bucket, Key)),
+                 ?MUT:delete_object(State, Bucket, Key)),
     ?assertEqual(ok,
-		 ?MUT:delete_bucket(State, Bucket)),
+                 ?MUT:delete_bucket(State, Bucket)),
     ok.
 
 %% --- get service xml
@@ -145,11 +145,11 @@ test_002(State,_) ->
 
     {ok,XML0} = ?MUT:get_service_xml(State),
     ?assertEqual(ok,
-		 ?MUT:put_bucket(State, Bucket, ACL)),
+                 ?MUT:put_bucket(State, Bucket, ACL)),
     ?assertEqual(ok,
-		 ?MUT:delete_bucket(State, Bucket)),
+                 ?MUT:delete_bucket(State, Bucket)),
     ?assertMatch({ok,XML0},
-		 ?MUT:get_service_xml(State)),
+                 ?MUT:get_service_xml(State)),
     ok.
 
 %% --- get service
@@ -163,14 +163,14 @@ test_003(State,_) ->
 
     {ok,{_,Buckets0}} = ?MUT:get_service(State),
     ?assertEqual(ok,
-		 ?MUT:put_bucket(State, Bucket, ACL)),
+                 ?MUT:put_bucket(State, Bucket, ACL)),
     {ok,{_,Buckets1}} = ?MUT:get_service(State),
     ?assertEqual(ok,
-		 ?MUT:delete_bucket(State, Bucket)),
+                 ?MUT:delete_bucket(State, Bucket)),
     ?assertMatch({ok,{_,Buckets0}},
-		 ?MUT:get_service(State)),
+                 ?MUT:get_service(State)),
     ?assertEqual(Bucket,
-		 (hd(Buckets1--Buckets0))#bucket.name),
+                 (hd(Buckets1--Buckets0))#bucket.name),
     ok.
 
 %% --- get bucket
@@ -183,11 +183,11 @@ test_004(State,_) ->
     cleanup(State, Bucket),
 
     ?assertEqual(ok,
-		 ?MUT:put_bucket(State, Bucket, ACL)),
+                 ?MUT:put_bucket(State, Bucket, ACL)),
     ?assertMatch({ok,#list_bucket{name=Bucket}},
-		 ?MUT:get_bucket(State, Bucket)),
+                 ?MUT:get_bucket(State, Bucket)),
     ?assertEqual(ok,
-		 ?MUT:delete_bucket(State, Bucket)),
+                 ?MUT:delete_bucket(State, Bucket)),
     ok.
 
 %% --- get bucket with an object put
@@ -203,17 +203,17 @@ test_005(State,ServerType) ->
     cleanup(State,Bucket,Key,ServerType),
 
     ?assertEqual(ok,
-		 ?MUT:put_bucket(State, Bucket, ACL)),
+                 ?MUT:put_bucket(State, Bucket, ACL)),
     ?assertEqual(ok,
-		 ?MUT:put_object(State,Bucket,Key,Value,ACL)),
+                 ?MUT:put_object(State,Bucket,Key,Value,ACL)),
     ?assertMatch({ok,ValueBin},
-		 ?MUT:get_object(State, Bucket, Key)),
+                 ?MUT:get_object(State, Bucket, Key)),
     ?assertMatch({ok,#list_bucket{name=Bucket}},
-		 ?MUT:get_bucket(State, Bucket)),
+                 ?MUT:get_bucket(State, Bucket)),
     ?assertEqual(ok,
-		 ?MUT:delete_object(State, Bucket, Key)),
+                 ?MUT:delete_object(State, Bucket, Key)),
     ?assertEqual(ok,
-		 ?MUT:delete_bucket(State, Bucket)),
+                 ?MUT:delete_bucket(State, Bucket)),
     ok.
 
 %% --- put, head and delete objects
@@ -224,19 +224,19 @@ test_006(State,ServerType) ->
     Bucket = "bucket006",
     Key = "Key006",
     Value = "Value006",
-    
+
     cleanup(State,Bucket,Key,ServerType),
 
     ?assertEqual(ok,
-		 ?MUT:put_bucket(State, Bucket, ACL)),
+                 ?MUT:put_bucket(State, Bucket, ACL)),
     ?assertEqual(ok,
-		 ?MUT:put_object(State,Bucket,Key,Value,ACL)),
+                 ?MUT:put_object(State,Bucket,Key,Value,ACL)),
     ?assertMatch({ok,_Header},
-		 ?MUT:head_object(State, Bucket, Key)),
+                 ?MUT:head_object(State, Bucket, Key)),
     ?assertEqual(ok,
-		 ?MUT:delete_object(State, Bucket, Key)),
+                 ?MUT:delete_object(State, Bucket, Key)),
     ?assertEqual(ok,
-		 ?MUT:delete_bucket(State, Bucket)),
+                 ?MUT:delete_bucket(State, Bucket)),
     ok.
 
 test_zzz(_,_) ->
@@ -248,45 +248,45 @@ add_user(Name) ->
     Host = "localhost",
     Port = 23580,
     Header = [{"Host",Host},{"connection","close"},
-	      {"x-amz-name",Name}],
+              {"x-amz-name",Name}],
     URL = "http://"++Host++":"++integer_to_list(Port)
-	++"/",
+        ++"/",
     Req = {URL, Header, "text/plain", ""},
     {ok,{_,HDR,_}} = httpc:request(put, Req, [], []),
     {?FIELD_KEYID,KeyId}=lists:keyfind(?FIELD_KEYID,1,HDR),
     {?FIELD_KEY,Key}=lists:keyfind(?FIELD_KEY,1,HDR),
-					  
+
     {ok, KeyId, Key}.
 
 
 cleanup(State,Bucket) ->
     Ret =
-	case ?MUT:delete_bucket(State, Bucket) of
-	    ok -> ok;
-	    key_not_exist -> ok;
-	    Err -> Err
-	end,
+        case ?MUT:delete_bucket(State, Bucket) of
+            ok -> ok;
+            key_not_exist -> ok;
+            Err -> Err
+        end,
     ?assertEqual(ok, Ret).
 
 cleanup(State,Bucket,Key,ServerType) ->
     RetObj =
-	case ?MUT:delete_object(State, Bucket, Key) of
-	    X when X==ok orelse X==key_not_exist ->
-		ok;
-	    {ok,_} = Err ->
-		if ServerType==hibari ->
-			%% workaround hibari 500 error
-			ok;
-		   true ->
-			{delete_object_error, Err}
-		end;
-	    Err ->
-		{delete_object_error, Err}
-	end,
+        case ?MUT:delete_object(State, Bucket, Key) of
+            X when X==ok orelse X==key_not_exist ->
+                ok;
+            {ok,_} = Err ->
+                if ServerType==hibari ->
+                        %% workaround hibari 500 error
+                        ok;
+                   true ->
+                        {delete_object_error, Err}
+                end;
+            Err ->
+                {delete_object_error, Err}
+        end,
     RetBucket =
-	case ?MUT:delete_bucket(State, Bucket) of
-	    ok -> ok;
-	    key_not_exist -> ok;
-	    Err2 -> {delete_bucket_error, Err2}
-	end,
+        case ?MUT:delete_bucket(State, Bucket) of
+            ok -> ok;
+            key_not_exist -> ok;
+            Err2 -> {delete_bucket_error, Err2}
+        end,
     ?assertEqual({ok,ok}, {RetObj, RetBucket}).
