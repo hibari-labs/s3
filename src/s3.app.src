@@ -3,7 +3,7 @@
 {application, s3,
  [
   {description, "S3"},
-  {vsn, "0.1.1"},
+  {vsn, "0.1.1.1"},
   {registered, []},
   {applications, [kernel, stdlib, sasl, inets]},
   {mod, {s3_app, []}},
